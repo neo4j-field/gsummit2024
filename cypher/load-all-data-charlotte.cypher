@@ -10,13 +10,11 @@ DETACH DELETE n;
 //WARNING! This will DROP all your indexes and constraints
 CALL apoc.schema.assert({},{});
 
-:param SectionPointDir => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships';
-:param filePOIs => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/POIs.csv';
-
+//CREATE a CONSTRAINT to ensure that the 'id' of an Operational Point is both there, and unique.
 CREATE CONSTRAINT uc_OperationPoint_id IF NOT EXISTS FOR (op:OperationPoint) REQUIRE (op.id) IS UNIQUE;
 
 //
-// Loading Operations Points from all available countries
+// Loading Operational Points
 //
 LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/nodes/OperationPoint_All.csv" AS row
 WITH 
@@ -82,23 +80,35 @@ CREATE INDEX index_OperationPointName_name IF NOT EXISTS FOR (opn:OperationPoint
 // available station / passenger stop geo point
 //
 
-LOAD CSV WITH HEADERS FROM $filePOIs AS line FIELDTERMINATOR ';'
-WITH line.CITY AS city, line.POI_DESCRIPTION AS description, line.LINK_FOTO AS linkFoto, line.LINK_WEBSITE AS linkWeb, line.LAT AS lat, line.LONG AS long, line.SECRET AS secret
+LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/POIs-csv.csv' AS row
+WITH 
+    row.CITY AS city,
+    row.POI_DESCRIPTION AS description,
+    row.LINK_FOTO AS linkFoto,
+    row.LINK_WEBSITE AS linkWeb,
+    row.LAT AS lat,
+    row.LONG AS long,
+    row.SECRET AS secret
 CREATE (po:POI {geolocation:point({latitude: toFloat(lat),longitude: toFloat(long)})})
-SET po.description = description,
-po.city = city,
-po.linkWebSite = linkWeb,
-po.linkFoto = linkFoto,
-po.long = toFloat(long),
-po.lat = toFloat(lat),
-po.secret = toBoolean(secret);
+SET 
+    po.description = description,
+    po.city = city,
+    po.linkWebSite = linkWeb,
+    po.linkFoto = linkFoto,
+    po.long = toFloat(long),
+    po.lat = toFloat(lat),
+    po.secret = toBoolean(secret);
+
 
 MATCH (poi:POI)
 MATCH (op:OperationPoint) 
 WHERE "Station" IN labels(op) or "SmallStation" IN labels(op)
-WITH poi, op, point.distance(poi.geolocation, op.geolocation) as distance
-ORDER by distance
-WITH poi, collect(op)[0] as closest
+WITH 
+    poi, 
+    op, 
+    point.distance(poi.geolocation, op.geolocation) AS distance
+ORDER BY distance
+WITH poi, COLLECT(op)[0] AS closest
 MERGE (closest)-[:IS_NEAR]->(poi);
 
 // ==== DONE LOADING ====
