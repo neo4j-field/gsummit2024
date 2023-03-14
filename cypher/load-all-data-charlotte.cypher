@@ -1,8 +1,12 @@
-MATCH(o) DETACH DELETE o; // optional, only if data exists and you want to clear the DB
+// 
+// This file is to be executed in the Neo4j Browser
+//
+
+
+MATCH (n) DETACH DELETE n; // optional, only if data exists and you want to clear the DB
 
 :param OpPointsDir => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/nodes';
 :param SectionPointDir => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships';
-// Point of Interest Data
 :param filePOIs => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/POIs.csv';
 
 CREATE CONSTRAINT uc_OperationPoint_id IF NOT EXISTS FOR (op:OperationPoint) REQUIRE (op.id) IS UNIQUE;
@@ -10,10 +14,24 @@ CREATE CONSTRAINT uc_OperationPoint_id IF NOT EXISTS FOR (op:OperationPoint) REQ
 //
 // Loading Operations Points from all available countries
 //
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_DE.csv" as row
-MERGE (op:OperationPoint {id: row.id})
-SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-CREATE (op)-[:NAMED {country: "DE"}]->(:OperationPointName {name: row.name});
+LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_All.csv" as row
+WITH 
+    trim(row.id) AS id,
+    toFloat(row.latitude) AS latitude,
+    toFloat(row.longitude) AS longitude,
+    row.name AS name,
+    ["OperationPoint"] + row.country AS labels
+
+MERGE (op:OperationPoint {id: id})
+SET 
+    op.geolocation = Point({latitude: latitude, longitude: longitude}),
+    op.name = name
+WITH op, labels
+CALL apoc.create.setLabels(op, labels) YIELD node 
+RETURN distinct "Complete"
+
+
+
 
 // LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_BE.csv" as row
 // MERGE (op:OperationPoint {id: row.id})
