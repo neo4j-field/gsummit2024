@@ -39,107 +39,26 @@ RETURN distinct "Complete"
 //
 // Chaining up sections
 //
-LOAD CSV WITH HEADERS FROM  "/SECTION_DE.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_BE.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_DK.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_SE.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_FR.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_ES.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_IT.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_CH.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_LU.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_NL.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_UK.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)
-MATCH (target:OperationPoint WHERE target.id = row.target)
-MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
+LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships/SECTION_ALL_Length.csv" AS row
+WITH
+    trim(row.source) AS source,
+    trim(row.target) AS target,
+    toFloat(row.sectionlength) AS length
+MATCH (source:OperationPoint WHERE source.id = source)
+MATCH (target:OperationPoint WHERE target.id = target)
+MERGE (source)-[:SECTION {sectionlength: sectionlength}]->(target);
 
 //
 // Load Speed Data
 //
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_DE_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
+LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships/SECTION_ALL_speed.csv" AS row
+WITH
+    trim(row.source) AS source,
+    trim(row.target) AS target,
+    toFloat(row.sectionspeed) AS speed
+MATCH (:OperationPoint WHERE source.id = source)-[s:SECTION]->(:OperationPoint WHERE target.id = target)
+SET s.speed = speed;
 
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_BE_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_DK_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_SE_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_FR_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_ES_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_IT_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_CH_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_LU_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_NL_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
-
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_UK_speed.csv" as row
-MATCH (source:OperationPoint WHERE source.id = row.source)-[s:SECTION]->(target:OperationPoint WHERE target.id = row.target)
-SET s.speed = toFloat(row.sectionspeed);
 
 // Create one more index for the Operation Point name
 CREATE INDEX index_OperationPointName_name IF NOT EXISTS FOR (opn:OperationPointName) ON (opn.name);
