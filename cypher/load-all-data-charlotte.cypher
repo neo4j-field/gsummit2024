@@ -3,9 +3,13 @@
 //
 
 
-MATCH (n) DETACH DELETE n; // optional, only if data exists and you want to clear the DB
+// WARNING! This will erase your database contents
+MATCH (n)
+DETACH DELETE n;
 
-:param OpPointsDir => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/nodes';
+//WARNING! This will DROP all your indexes and constraints
+CALL apoc.schema.assert({},{});
+
 :param SectionPointDir => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships';
 :param filePOIs => 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/POIs.csv';
 
@@ -14,79 +18,28 @@ CREATE CONSTRAINT uc_OperationPoint_id IF NOT EXISTS FOR (op:OperationPoint) REQ
 //
 // Loading Operations Points from all available countries
 //
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_All.csv" as row
+LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/nodes/OperationPoint_All.csv" AS row
 WITH 
     trim(row.id) AS id,
     toFloat(row.latitude) AS latitude,
     toFloat(row.longitude) AS longitude,
     row.name AS name,
-    ["OperationPoint"] + row.country AS labels
-
+    [] + row.country + row.extralabel AS labels,
+    row.country AS country
 MERGE (op:OperationPoint {id: id})
-SET 
+ON CREATE SET
     op.geolocation = Point({latitude: latitude, longitude: longitude}),
     op.name = name
+ON MATCH SET
+    op.name = op.name + "/(" + country +") " + name
 WITH op, labels
-CALL apoc.create.setLabels(op, labels) YIELD node 
+CALL apoc.create.addLabels( op, labels ) YIELD node
 RETURN distinct "Complete"
-
-
-
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_BE.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "BE"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_DK.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "DK"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_SE.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "SE"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_FR.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "FR"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_ES.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "ES"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_IT.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "IT"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_CH.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "CH"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_LU.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "LU"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_NL.csv" as row
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "NL"}]->(:OperationPointName {name: row.name});
-
-// LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_UK.csv" as row FIELDTERMINATOR ";"
-// MERGE (op:OperationPoint {id: row.id})
-// SET op.geolocation = Point({latitude: toFloat(row.latitude), longitude: toFloat(row.longitude)})
-// CREATE (op)-[:NAMED {country: "UK"}]->(:OperationPointName {name: row.name});
 
 //
 // Chaining up sections
 //
-LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_DE.csv" as row
+LOAD CSV WITH HEADERS FROM  "/SECTION_DE.csv" as row
 MATCH (source:OperationPoint WHERE source.id = row.source)
 MATCH (target:OperationPoint WHERE target.id = row.target)
 MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
@@ -140,62 +93,6 @@ LOAD CSV WITH HEADERS FROM $SectionPointDir + "/SECTION_UK.csv" as row
 MATCH (source:OperationPoint WHERE source.id = row.source)
 MATCH (target:OperationPoint WHERE target.id = row.target)
 MERGE (source)-[:SECTION {sectionlength: toFloat(row.sectionlength)}]->(target);
-
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_DE.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_BE.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_DK.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_SE.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_FR.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_ES.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_IT.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_CH.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_LU.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_NL.csv" as row
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
-
-LOAD CSV WITH HEADERS FROM $OpPointsDir + "/OperationPoint_UK.csv" as row  FIELDTERMINATOR ";"
-MATCH (op:OperationPoint WHERE op.id = row.id)
-CALL apoc.create.addLabels( id(op), [ row.extralabel ] ) YIELD node
-RETURN count(*);
 
 //
 // Load Speed Data
