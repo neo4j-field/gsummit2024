@@ -34,30 +34,43 @@ ON MATCH SET
     op.name = op.name + "/(" + country +") " + name
 WITH op, labels
 CALL apoc.create.addLabels( op, labels ) YIELD node
-RETURN distinct "Complete"
+RETURN distinct "Complete";
 
 //
 // Chaining up sections
 //
 LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships/SECTION_ALL_Length.csv" AS row
 WITH
-    trim(row.source) AS source,
-    trim(row.target) AS target,
+    trim(row.source) AS sourceId,
+    trim(row.target) AS targetId,
     toFloat(row.sectionlength) AS length
-MATCH (source:OperationPoint WHERE source.id = source)
-MATCH (target:OperationPoint WHERE target.id = target)
-MERGE (source)-[:SECTION {sectionlength: sectionlength}]->(target);
+MATCH (source:OperationPoint WHERE source.id = sourceId)
+MATCH (target:OperationPoint WHERE target.id = targetId)
+MERGE (source)-[s:SECTION]->(target)
+SET s.sectionlength = length;
 
 //
 // Load Speed Data
 //
-LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships/SECTION_ALL_speed.csv" AS row
+LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/relationships/SECTION_ALL_Speed.csv" AS row
 WITH
-    trim(row.source) AS source,
-    trim(row.target) AS target,
+    trim(row.source) AS sourceId,
+    trim(row.target) AS targetId,
     toFloat(row.sectionspeed) AS speed
-MATCH (:OperationPoint WHERE source.id = source)-[s:SECTION]->(:OperationPoint WHERE target.id = target)
+MATCH (source:OperationPoint WHERE source.id = sourceId)
+MATCH (target:OperationPoint WHERE target.id = targetId)
+MERGE (source)-[s:SECTION]->(target)
 SET s.speed = speed;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//NOT CHANGED/CHECKED BELOW YET!!!!!
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Create one more index for the Operation Point name
