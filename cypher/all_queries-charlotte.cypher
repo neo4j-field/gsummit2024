@@ -6,7 +6,7 @@
 // Show Operation Point Names and limit the number of returned OPs to 10:
 MATCH (op:OperationalPointName) RETURN op LIMIT 10;
 
-// Show OPs and limit the number of returned tracks to 50:
+// Show OPs and limit the number of returned sections to 50:
 MATCH (op:OperationalPoint) RETURN op LIMIT 50;
 
 // Show OperationalPoints and Sections, have a look how those two queries defer!
@@ -14,7 +14,7 @@ MATCH path=(:OperationalPoint)--(:OperationalPoint) RETURN path LIMIT 100;
 MATCH path=(:OperationalPoint)-[:SECTION]->(:OperationalPoint) RETURN path LIMIT 100;
 
 // using the WHERE clause in two different way:
-MATCH (op:OperationalPoint {id:'SECst'}) RETURN op;
+MATCH (op:OperationalPoint WHERE op.id='SECst') RETURN op;
 MATCH (op:OperationalPoint) WHERE op.id='SECst' RETURN op;
 
 // Profile and explain some of the queries to see their execution plans:
@@ -26,23 +26,51 @@ EXPLAIN MATCH (op:OperationalPoint) WHERE op.id='DE000BL' RETURN op;
 
 // Fixing some gaps (see README for more information)
 
+
+
+
+
+
+
+
+///////////////////////////////////////////////
+//
+// Why are we using a path here?
+//
+//////////////////////////////
+
 // DK00320 - German border gap
-MATCH sg=(op1 WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2 WHERE op2.id STARTS WITH 'EU')
-MATCH (op3 WHERE op3.id STARTS WITH 'DK')
-WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) as distance
-ORDER by distance LIMIT 1
+MATCH 
+  sg=(op1:OperationalPoint WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
+  (op3:OperationalPoint WHERE op3.id STARTS WITH 'DK')
+WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) AS distance
+ORDER BY distance LIMIT 1
 MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
 
+
+///////////////////////////////////////////////
+//
+// Why are we using a path here?
+//
+//////////////////////////////
 // DK00200 - Nyborg gap
-MATCH sg=(op1:OperationalPoint WHERE op1.id = 'DK00200'),(op2:OperationalPoint)-[:NAMED]->(opn:OperationalPointName WHERE opn.name = "Nyborg")
+MATCH 
+  sg=(op1:OperationalPoint WHERE op1.id = 'DK00200'),
+  (op2:OperationalPoint)-[:NAMED]->(opn:OperationalPointName WHERE opn.name = "Nyborg")
 MERGE (op1)-[:SECTION {sectionlength: point.distance(op1.geolocation, op2.geolocation)/1000.0, fix: true}]->(op2);
 
+
+
+//////////////////////// CHECK THIS 
 // EU00228 - FR0000016210 through the channel
-MATCH sg=(op1 WHERE op1.id STARTS WITH 'UK')-[:SECTION]-(op2 WHERE op2.id STARTS WITH 'EU')
-MATCH (op3 WHERE op3.id STARTS WITH 'FR')
-WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) as distance
-ORDER by distance LIMIT 1
+MATCH 
+  (op1:OperationalPoint WHERE op1.id STARTS WITH 'UK')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
+  (op3:OperationalPoint WHERE op3.id STARTS WITH 'FR')
+WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) AS distance
+ORDER BY distance LIMIT 1
 MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
+
+
 
 
 // Find not connected parts for Denmark --> Also try other coutries like DE, FR, IT and so on.
@@ -51,21 +79,30 @@ WHERE a.id STARTS WITH 'DK'
 RETURN path;
 
 // or inside the complete dataset
-MATCH path=a:OperationalPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
+MATCH path=(a:OperationalPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
 RETURN path;
+
+
+
+
+
+// ******************************************************
+// ** We do this again later on???!?!
+// ******************************************************
 
 // Set additional traveltime parameter in seconds for a particular section --> requires speed and 
 // sectionlength properties set on this section!
 MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
 WHERE r.speed > 0
-WITH r, r.speed * (1000.0/3600.0) as speed_ms
-SET r.traveltim = r.sectionlength / speed_ms
+WITH r, r.speed * (1000.0/3600.0) AS speed_ms
+SET r.traveltime = r.sectionlength / speed_ms
 RETURN count(*);
 
 // Shortest Path Queries using different Shortest Path functions in Neo4j
 
 // Cypher shortest path
-MATCH sg=shortestPath((op1 WHERE op1.id = 'BEFBMZ')-[SECTION*]-(op2 WHERE op2.id = 'DE000BL')) RETURN sg;
+MATCH sg=shortestPath((op1 WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2 WHERE op2.id = 'DE000BL')) 
+RETURN sg;
 
 // APOC Dijkstra shortest path with weight sectionlength
 MATCH (n:OperationalPoint), (m:OperationalPoint)
@@ -124,8 +161,8 @@ ORDER BY score DESC;
 // Using to find the gap ...
 MATCH sg=(op1 WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2 WHERE op2.id STARTS WITH 'EU')
 MATCH (op3 WHERE op3.id STARTS WITH 'DK')
-RETURN op2.id, op3.id, point.distance(op3.geolocation, op2.geolocation) as distance
-ORDER by distance LIMIT 1;
+RETURN op2.id, op3.id, point.distance(op3.geolocation, op2.geolocation) AS distance
+ORDER BY distance LIMIT 1;
 
 // ===================================
 // Setting a traveltime property on the SECTION relationship to calculate Shortest Path on time
@@ -137,7 +174,7 @@ ORDER by distance LIMIT 1;
 // ===================================
 MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
 WHERE r.speed > 0
-WITH r, r.speed * (1000.0/3600.0) as speed_ms
+WITH r, r.speed * (1000.0/3600.0) AS speed_ms
 SET r.traveltime = r.sectionlength / speed_ms
 RETURN count(*);
 
@@ -159,20 +196,20 @@ RETURN DISTINCT substring(lables(op.id),0,2) AS countries ORDER BY countries;
 // Find all different types of Operation Points / Labels
 MATCH (n)
 WITH DISTINCT labels(n) AS allOPs
-UNWIND allOPs as ops
+UNWIND allOPs AS ops
 RETURN DISTINCT ops;
 
 // Number of different Operation Points including POIs
 MATCH (n)
 WITH labels(n) AS allOPs
-UNWIND allOPs as ops
+UNWIND allOPs AS ops
 RETURN  ops, count(ops);
 
 //
 // Number of different OP Numbers
 // 
 MATCH (a:OperationalPoint)
-WITH substring(a.id,0,2) as country, collect(a.id) as list
+WITH substring(a.id,0,2) AS country, collect(a.id) AS list
 RETURN country, list[0];
 
 //
@@ -188,7 +225,7 @@ MATCH sg=shortestPath((op1 WHERE op1.id = 'ES60000')-[SECTION*]-(op2 WHERE op2.i
 //
 
 MATCH (source:OperationalPoint WHERE source.id = 'BEFBMZ'), (target:OperationalPoint WHERE target.id = 'DE000BL')
-CALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path, weight as weight
+CALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path AS path, weight AS weight
 RETURN path, weight;
 
 // Shortest path by distance (Rotterdam --> Den Bosch)
@@ -208,7 +245,7 @@ RETURN path, weight;
 // Business Like Queries
 
 // =================================================================================
-// This query is provided as is. It propagades speed data to a country that does not 
+// This query is provided AS is. It propagades speed data to a country that does not 
 // have speed data in the EU Railway Agency Database. DO NOT USE it for the graph loaded
 // in this workshop!!!
 // ================================================================================= 
@@ -216,7 +253,7 @@ CALL apoc.periodic.commit(
   "WITH $limit AS thelimit LIMIT $limit
    MATCH ()-[a:SECTION]-()-[b:SECTION]->()-[c:SECTION]-()
    WHERE b.sectionmaxspeed IS NULL
-   WITH b, collect(DISTINCT a) + collect(DISTINCT c) as sections
+   WITH b, collect(DISTINCT a) + collect(DISTINCT c) AS sections
    UNWIND sections AS section
    WITH b, collect(section.sectionmaxspeed) AS speeds
    WHERE speeds <> []
