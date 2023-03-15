@@ -165,6 +165,13 @@ ORDER BY score DESC;
 //
 // ===================================
 // Using to find the gap ...
+
+
+///////////////////////////////////////////////
+//
+// Why are we using a path here?
+//
+//////////////////////////////
 MATCH sg=(op1 WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2 WHERE op2.id STARTS WITH 'EU')
 MATCH (op3 WHERE op3.id STARTS WITH 'DK')
 RETURN op2.id, op3.id, point.distance(op3.geolocation, op2.geolocation) AS distance
@@ -194,23 +201,46 @@ MATCH(op:OperationalPointName)
 WHERE op.name CONTAINS 'Malmö'
 RETURN op.name;
 
+///////////////////////////////////////////////
+//
+// Rewrite to use Labels
+//
+//////////////////////////////
+
 // Countries
 MATCH (op:OperationalPoint)
-RETURN DISTINCT substring(lables(op.id),0,2) AS countries ORDER BY countries;
+RETURN DISTINCT substring(op.id,0,2) AS countries ORDER BY countries;
 
 
+
+///////////////////////////////////////////////
+//
+// But this doesn't do that, as it gets ALL nodes, not just OPs
+//
+//////////////////////////////
 // Find all different types of Operation Points / Labels
 MATCH (n)
 WITH DISTINCT labels(n) AS allOPs
 UNWIND allOPs AS ops
 RETURN DISTINCT ops;
 
+///////////////////////////////////////////////
+//
+// But this doesn't do that, as it gets ALL nodes, not just OPs
+//
+//////////////////////////////
 // Number of different Operation Points including POIs
 MATCH (n)
 WITH labels(n) AS allOPs
 UNWIND allOPs AS ops
 RETURN  ops, count(ops);
 
+
+///////////////////////////////////////////////
+//
+// Number of different OP numbers, BY COUNTRY
+//
+//////////////////////////////
 //
 // Number of different OP Numbers
 // 
@@ -221,17 +251,30 @@ RETURN country, list[0];
 //
 // Cypher shortest path
 //
-
-MATCH sg=shortestPath((op1 WHERE op1.id = 'BEFBMZ')-[SECTION*]-(op2 WHERE op2.id = 'DE000BL')) RETURN sg;
-MATCH sg=shortestPath((op1 WHERE op1.id = 'FR0000002805')-[SECTION*]-(op2 WHERE op2.id = 'DE000BL')) RETURN sg;
-MATCH sg=shortestPath((op1 WHERE op1.id = 'ES60000')-[SECTION*]-(op2 WHERE op2.id = 'DE000BL')) RETURN sg;
+///////////////////////////////////////////////
+//
+// Luckily this works, as there is only one type of rel between OperationalPoints, BUT
+//   -[SECTION*]- should be -[:SECTION*]
+// Also - no use of labels for nodes, so we're scanning the DB
+// Point in case - Profiling:
+//    'as is'           = 259,890 hits
+//    Labels            = 54,878
+//    :Section + Labels = 38,061
+//
+//////////////////////////////
+MATCH p=shortestPath((op1:OperationalPoint WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL')) RETURN p;
+MATCH p=shortestPath((op1:OperationalPoint WHERE op1.id = 'FR0000002805')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL')) RETURN p;
+MATCH p=shortestPath((op1:OperationalPoint WHERE op1.id = 'ES60000')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL')) RETURN p;
 
 //
 // APOC dijkstra shortes path
 //
 
-MATCH (source:OperationalPoint WHERE source.id = 'BEFBMZ'), (target:OperationalPoint WHERE target.id = 'DE000BL')
-CALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path AS path, weight AS weight
+MATCH 
+  (source:OperationalPoint WHERE source.id = 'BEFBMZ'), 
+  (target:OperationalPoint WHERE target.id = 'DE000BL')
+CALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') 
+YIELD path, weight
 RETURN path, weight;
 
 // Shortest path by distance (Rotterdam --> Den Bosch)
@@ -241,8 +284,14 @@ WITH n,m
 CALL apoc.algo.dijkstra(n, m, 'SECTION', 'sectionlength') YIELD path, weight
 RETURN path, weight;
 
+
+///////////////////////////////////
+//
+// Station doesn't have a Name property??
+//
+///////////////
 // Shortest path by travel time (Rotterdam --> Den Bosch)
-// MATCH (n:Station), (m:Station)
+MATCH (n:Station), (m:Station)
 WHERE n.name = "Rotterdam Centraal" and m.name = "'s Hertogenbosch"
 WITH n,m
 CALL apoc.algo.dijkstra(n, m, 'ROUTE', 'travel_time_seconds') YIELD path, weight
@@ -250,6 +299,9 @@ RETURN path, weight;
 
 // Business Like Queries
 
+
+
+/// THEN WHY IS THIS HERE???
 // =================================================================================
 // This query is provided AS is. It propagades speed data to a country that does not 
 // have speed data in the EU Railway Agency Database. DO NOT USE it for the graph loaded
