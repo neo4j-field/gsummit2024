@@ -59,9 +59,6 @@ MATCH
   (op2:OperationalPoint)-[:NAMED]->(opn:OperationalPointName WHERE opn.name = "Nyborg")
 MERGE (op1)-[:SECTION {sectionlength: point.distance(op1.geolocation, op2.geolocation)/1000.0, fix: true}]->(op2);
 
-
-
-//////////////////////// CHECK THIS 
 // EU00228 - FR0000016210 through the channel
 MATCH 
   (op1:OperationalPoint WHERE op1.id STARTS WITH 'UK')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
@@ -69,9 +66,6 @@ MATCH
 WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) AS distance
 ORDER BY distance LIMIT 1
 MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
-
-
-
 
 // Find not connected parts for Denmark --> Also try other coutries like DE, FR, IT and so on.
 MATCH path=(a:OperationalPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
@@ -82,13 +76,11 @@ RETURN path;
 MATCH path=(a:OperationalPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
 RETURN path;
 
-
-
-
-
-// ******************************************************
-// ** We do this again later on???!?!
-// ******************************************************
+///////////////////////////////////////////////
+//
+// This is repeated later on
+//
+//////////////////////////////
 
 // Set additional traveltime parameter in seconds for a particular section --> requires speed and 
 // sectionlength properties set on this section!
@@ -108,7 +100,7 @@ RETURN sg;
 MATCH (n:OperationalPoint), (m:OperationalPoint)
 WHERE n.id = "BEFBMZ" and m.id = "DE000BL"
 WITH n,m
-CALL apoc.algo.dijktra(n, m, 'SECTION', 'sectionlength') YIELD path, weight
+CALL apoc.algo.dijkstra(n, m, 'SECTION', 'sectionlength') YIELD path, weight
 RETURN path, weight;
 
 // ******************************************************************************************
@@ -135,7 +127,7 @@ CALL gds.shortestPath.dijkstra.stream('OperationalPoints', {
     targetNode: target,
     relationshipWeightProperty: 'sectionlength'
 })
-YIELD inex, sourceNode, targetNode, totalCost, nodeIds, costs, path
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN *;
 
 // Now we use the Weakly Connected Components Algo
@@ -144,13 +136,27 @@ WITH collect(gds.util.asNode(nodeId).id) AS lista, componentId
 RETURN lista,componentId order by size(lista) ASC;
 
 // Matching a specific OperationalPoint  from the list above --> use the Neo4j browser output to check the network it is belonging to (see the README file for more information). You will figure out, that it is an isolated network of OperationalPoint s / stations / etc.:
-MATCH (op:OperationalPoints) WHERE op.id='BEFBMZ' RETURN op;
+MATCH (op:OperationalPoint) WHERE op.id='BEFBMZ' RETURN op;
 
 // Use the betweenness centrality algo
 CALL gds.betweenness.stream('OperationalPoints')
 YIELD nodeId, score
-RETURN gds.util.asNde(nodeId).id AS id, score
+RETURN gds.util.asNode(nodeId).id AS id, score
 ORDER BY score DESC;
+
+
+
+
+///////////////////////////////////////////////////
+// Fixed (in the sense of 'they run') up to here
+/////////////////////////
+
+
+
+
+
+
+
 
 
 // ===================================
