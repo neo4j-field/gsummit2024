@@ -9,8 +9,8 @@ It provides an environment for further experiments and can be used to show the v
 ### Target Audience
 
 The workshop is intended for those who:
-* Are new to Graph Databases or Graph Analytics,
-* Have experience of Graph Databases or Graph Analytics who are looking for a different example of the value of Graph,
+* Are new to Graph Databases or Graph Analytics
+* Have experience of Graph Databases or Graph Analytics who are looking for a different example of the value of Graph
 
 ---
 ## About the data
@@ -25,11 +25,11 @@ The format of the data has been converted to a Comma Seperated Values (`CSV`) fo
 Operational Points are the start and end points of a Section. 
 
 There are many types of Operational Points, including:
-* Stations, 
-* Small Stations, 
-* Passenger Stops, 
-* Switches, 
-* Junctions,
+* Stations
+* Small Stations
+* Passenger Stops
+* Switches
+* Junctions
 
 Operational Points have the following properties:
 
@@ -73,7 +73,7 @@ POIs have the following properties:
 The following high level steps are required, to build the demo environment:
 
 1. Create a Neo4j Graph instance via any of:
-    1. [Neo4j Desktop](https://neo4j.com/download-center/). 
+    1. [Neo4j Desktop](https://neo4j.com/download-center/)
         - If you are using Neo4j Desktop, you will need to ensure that both GDS and APOC are added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
     2. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
 
@@ -83,16 +83,18 @@ The following high level steps are required, to build the demo environment:
 
 <img width="800" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/791e76740b212686b73230a1cdca851b643bfbe1/images/data-model-all_labels.png">
 
-If you would hide all labels except the label "OperationalPoint" and "OperationalPointName" and "POI", you will see the basic data model that looks like this:
+If you hid all the labels with the exception of `OperationalPoint`, `OperationalPointName` and `POI`, you would see a simpler model similar to this:
 
 <img width="540" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/68b41bce4c3ecdd8c73da58f55b7c34790907f4d/images/data-model-with-poi.png">
 
-As you can see now in the data model, there is a OperationalPoint label and it is connected to itself with a SECTION relationship. This means, OperationalPoints are connected together and make up the rail network (as in the real world). A station (or other Operational Units like Switches, Passenger Stop, etc.) are connected as a separate node by the "NAMED" relationship that represents their name, etc..
+As you can see now in the data model, there is an `OperationalPoint` label and it is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network (as in the real world).
 
-4. Now you can find certain queries in the `./code` directory in the file called `all_queries.cypher` or if you keep on reading. Try them out by cutting and pasting them into the Neo4j browser like shown below. We will also do that in the workshop!
+The name of an `OperationPoint` has been extracted to the `OperationalPointName` node because there are `OperationalPoint`s with multiple names. These are typically `BorderPoint`s where each country has a different name for the `BorderPoint`. For example, the `BorderPoint` between Sweden and Denmark has the names 'Peberholm gränsen' (Sweden), and 'Peberholm grænse' (Denmark).
 
 ---
 ## Run some Cypher queries on your Graph (database)
+
+> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/all_queries.cypher) file. For the workshop we will be running through the contents of this readme.
 
 Let's start with some simple queries. Copy and Paste them into your Neo4j Browser in order to run them.
 
