@@ -98,12 +98,12 @@ The name of an `OperationPoint` has been extracted to the `OperationalPointName`
 
 Let's start with some simple queries. Copy and Paste them into your Neo4j Browser in order to run them.
 
-Show Operational Point Names and limit the number of returned OPs to 10:
+Show Operational Point Names and limit the number of returned OPNs to 10:
 ```cypher
 MATCH (op:OperationalPointName) RETURN op LIMIT 10;
 ```
 
-Show OPs and limit the number of returned OPs to 50:
+Show Operational Points and limit the number of returned OPs to 50:
 ```cypher
 MATCH (op:OperationalPoint) RETURN op LIMIT 50;
 ```
