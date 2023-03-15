@@ -41,11 +41,11 @@ EXPLAIN MATCH (op:OperationalPoint) WHERE op.id='DE000BL' RETURN op;
 
 // DK00320 - German border gap
 MATCH 
-  sg=(op1:OperationalPoint WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
+  (op1:OperationalPoint WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
   (op3:OperationalPoint WHERE op3.id STARTS WITH 'DK')
 WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) AS distance
 ORDER BY distance LIMIT 1
-MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
+MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(op2);
 
 
 ///////////////////////////////////////////////
@@ -55,9 +55,9 @@ MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
 //////////////////////////////
 // DK00200 - Nyborg gap
 MATCH 
-  sg=(op1:OperationalPoint WHERE op1.id = 'DK00200'),
+  (op1:OperationalPoint WHERE op1.id = 'DK00200'),
   (op2:OperationalPoint)-[:NAMED]->(opn:OperationalPointName WHERE opn.name = "Nyborg")
-MERGE (op1)-[:SECTION {sectionlength: point.distance(op1.geolocation, op2.geolocation)/1000.0, fix: true}]->(op2);
+MERGE (op1)-[:SECTION {sectionlength: point.distance(op1.geolocation, op2.geolocation)/1000.0, curated: true}]->(op2);
 
 // EU00228 - FR0000016210 through the channel
 MATCH 
@@ -65,7 +65,7 @@ MATCH
   (op3:OperationalPoint WHERE op3.id STARTS WITH 'FR')
 WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) AS distance
 ORDER BY distance LIMIT 1
-MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
+MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(op2);
 
 // Find not connected parts for Denmark --> Also try other coutries like DE, FR, IT and so on.
 MATCH path=(a:OperationalPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
@@ -76,14 +76,15 @@ RETURN path;
 MATCH path=(a:OperationalPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
 RETURN path;
 
-///////////////////////////////////////////////
+//Flow wise is this the right place
+// ===================================
+// Setting a traveltime property on the SECTION relationship to calculate Shortest Path on time
 //
-// This is repeated later on
-//
-//////////////////////////////
-
-// Set additional traveltime parameter in seconds for a particular section --> requires speed and 
+// This query MUST run before using the "Speed vs. Time" Dashboard with NeoDash
+// 
+// Set new traveltime parameter in seconds for a particular section --> requires speed and 
 // sectionlength properties set on this section!
+// ===================================
 MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
 WHERE r.speed > 0
 WITH r, r.speed * (1000.0/3600.0) AS speed_ms
@@ -93,7 +94,7 @@ RETURN count(*);
 // Shortest Path Queries using different Shortest Path functions in Neo4j
 
 // Cypher shortest path
-MATCH sg=shortestPath((op1 WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2 WHERE op2.id = 'DE000BL')) 
+MATCH sg=shortestPath((op1:OperationalPoint WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL')) 
 RETURN sg;
 
 // APOC Dijkstra shortest path with weight sectionlength
@@ -110,6 +111,7 @@ RETURN path, weight;
 // Node and the "SECTION" relationship
 // ******************************************************************************************
 
+//Look at a list to drop all....
 CALL gds.graph.drop('OperationalPoints'); // optional, only if projection exists already
 CALL gds.graph.project(
     'OperationalPoints',
@@ -147,8 +149,15 @@ ORDER BY score DESC;
 
 
 
+
+
+
+
+
+
 ///////////////////////////////////////////////////
-// Fixed (in the sense of 'they run') up to here
+// Go to Bloom
+// Go to NeoDash
 /////////////////////////
 
 
@@ -164,50 +173,19 @@ ORDER BY score DESC;
 // Some more special Queries
 //
 // ===================================
-// Using to find the gap ...
-
-
-///////////////////////////////////////////////
-//
-// Why are we using a path here?
-//
-//////////////////////////////
-MATCH sg=(op1 WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2 WHERE op2.id STARTS WITH 'EU')
-MATCH (op3 WHERE op3.id STARTS WITH 'DK')
-RETURN op2.id, op3.id, point.distance(op3.geolocation, op2.geolocation) AS distance
-ORDER BY distance LIMIT 1;
-
-// ===================================
-// Setting a traveltime property on the SECTION relationship to calculate Shortest Path on time
-//
-// This query MUST run before using the "Speed vs. Time" Dashboard with NeoDash
-// 
-// Set new traveltime parameter in seconds for a particular section --> requires speed and 
-// sectionlength properties set on this section!
-// ===================================
-MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
-WHERE r.speed > 0
-WITH r, r.speed * (1000.0/3600.0) AS speed_ms
-SET r.traveltime = r.sectionlength / speed_ms
-RETURN count(*);
-
 
 // ====================
 // Some more simple queries
 // ====================
 
-// Find Operation Points in Malmö
+// Find Operation Points that contain the word London
+// Maybe GeoSpatial --- Is the actual data useful
 MATCH(op:OperationalPointName)
-WHERE op.name CONTAINS 'Malmö'
+WHERE op.name CONTAINS 'London'
 RETURN op.name;
 
-///////////////////////////////////////////////
-//
-// Rewrite to use Labels
-//
-//////////////////////////////
-
-// Countries
+//**Rewrite** using labels instead
+// OPs by Country//Size of network
 MATCH (op:OperationalPoint)
 RETURN DISTINCT substring(op.id,0,2) AS countries ORDER BY countries;
 
@@ -219,21 +197,15 @@ RETURN DISTINCT substring(op.id,0,2) AS countries ORDER BY countries;
 //
 //////////////////////////////
 // Find all different types of Operation Points / Labels
+//xx
 MATCH (n)
 WITH DISTINCT labels(n) AS allOPs
 UNWIND allOPs AS ops
 RETURN DISTINCT ops;
 
-///////////////////////////////////////////////
-//
-// But this doesn't do that, as it gets ALL nodes, not just OPs
-//
-//////////////////////////////
-// Number of different Operation Points including POIs
 MATCH (n)
-WITH labels(n) AS allOPs
-UNWIND allOPs AS ops
-RETURN  ops, count(ops);
+RETURN DISTINCT labels(n) AS allOPs;
+
 
 
 ///////////////////////////////////////////////
@@ -242,7 +214,7 @@ RETURN  ops, count(ops);
 //
 //////////////////////////////
 //
-// Number of different OP Numbers
+// List of OP Ids By Country (no counts in there)
 // 
 MATCH (a:OperationalPoint)
 WITH substring(a.id,0,2) AS country, collect(a.id) AS list
@@ -262,13 +234,16 @@ RETURN country, list[0];
 //    :Section + Labels = 38,061
 //
 //////////////////////////////
+// Convert to names
 MATCH p=shortestPath((op1:OperationalPoint WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL')) RETURN p;
 MATCH p=shortestPath((op1:OperationalPoint WHERE op1.id = 'FR0000002805')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL')) RETURN p;
 MATCH p=shortestPath((op1:OperationalPoint WHERE op1.id = 'ES60000')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL')) RETURN p;
 
 //
-// APOC dijkstra shortes path
+// APOC dijkstra shortest path
 //
+
+// JD // REPLICATE IN GDS
 
 MATCH 
   (source:OperationalPoint WHERE source.id = 'BEFBMZ'), 
@@ -277,7 +252,7 @@ CALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength')
 YIELD path, weight
 RETURN path, weight;
 
-// Shortest path by distance (Rotterdam --> Den Bosch)
+// JD // REPLICATE IN GDS
 MATCH (n:OperationalPoint), (m:OperationalPoint)
 WHERE n.id = "BEFBMZ" and m.id = "DE000BL"
 WITH n,m
@@ -291,29 +266,9 @@ RETURN path, weight;
 //
 ///////////////
 // Shortest path by travel time (Rotterdam --> Den Bosch)
-MATCH (n:OperationalPointName), (m:OperationalPointName)<-[]
+// JD // REPLICATE IN GDS
+MATCH (n:OperationalPointName), (m:OperationalPointName)
 WHERE n.name = "Rotterdam" and m.name CONTAINS "Hertogenbosch"
 WITH n,m
 CALL apoc.algo.dijkstra(n, m, 'ROUTE', 'travel_time_seconds') YIELD path, weight
 RETURN path, weight;
-
-// Business Like Queries
-
-
-
-/// THEN WHY IS THIS HERE???
-// =================================================================================
-// This query is provided AS is. It propagades speed data to a country that does not 
-// have speed data in the EU Railway Agency Database. DO NOT USE it for the graph loaded
-// in this workshop!!!
-// ================================================================================= 
-CALL apoc.periodic.commit(
-  "WITH $limit AS thelimit LIMIT $limit
-   MATCH ()-[a:SECTION]-()-[b:SECTION]->()-[c:SECTION]-()
-   WHERE b.sectionmaxspeed IS NULL
-   WITH b, collect(DISTINCT a) + collect(DISTINCT c) AS sections
-   UNWIND sections AS section
-   WITH b, collect(section.sectionmaxspeed) AS speeds
-   WHERE speeds <> []
-   SET b.sectionmaxspeed = apoc.coll.avg(speeds)
-   RETURN count(*)",{limit:10});

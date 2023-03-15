@@ -25,6 +25,11 @@ CALL apoc.schema.assert({},{});
 CREATE CONSTRAINT uc_OperationalPoint_id IF NOT EXISTS FOR (op:OperationalPoint) REQUIRE (op.id) IS UNIQUE;
 
 //
+// Create index for the Operation Point name
+//
+CREATE INDEX index_OperationalPointName_name IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.name);
+
+//
 // Loading Operational Points
 //
 LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/OperationalPoint_All.csv" AS row
@@ -68,9 +73,6 @@ MATCH (source:OperationalPoint WHERE source.id = sourceId)
 MATCH (target:OperationalPoint WHERE target.id = targetId)
 MERGE (source)-[s:SECTION]->(target)
 SET s.speed = speed;
-
-// Create index for the Operation Point name
-CREATE INDEX index_OperationalPointName_name IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.name);
 
 //
 // Load Point of Interest data
