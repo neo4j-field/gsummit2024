@@ -10,13 +10,13 @@ It provides a playground for further experiments or can be used to "advertise" t
 #### About the data that is been used
 
 The datasets used here, describes a network of railroad sections and places (so called operation points) 
-connected by so called sections. Operation Points can be a variaty of places like a Stations, a Switches, etc., see more examples below.
+connected by so called sections. Operational Points can be a variaty of places like a Stations, a Switches, etc., see more examples below.
 
 The dataset is essentailly a "small" digital twin of the existing rail network in the EU countries.
 
 The dataset is freely available on the portal of the *European Union Agency for Railways and can be downloaded from their webpage. It offers many more parameters, e.g. type of power source and many more. We are not using all available parameters in this workshop, to keep it's complexity low. Data download is available in different formats e.g. xml or XLMS and we had to convert them into CSV to make loading more comfortable with cypher statements.
 
-- [Original Section/Operation Point Data](https://data-interop.era.europa.eu/search) comes from the European Union Agency for Railways.
+- [Original Section/Operational Point Data](https://data-interop.era.europa.eu/search) comes from the European Union Agency for Railways.
 
 ---
 ## Explaining the data set
@@ -32,11 +32,11 @@ The Sections have the following interesting **Properties** loaded to the Graph:
 - sectionlength: the length in km of that section
 - sectionspeed: max speed allowed on that section
 
-#### Operation Points
+#### Operational Points
 
 Operational Points are connecting the different sections and can be of various types. Some of which are Stations, Small Stations, Passenger Stops, Switches, Junctions and some more.
 
-Operation Points have the following **Properties** loaded to the Graph:
+Operational Points have the following **Properties** loaded to the Graph:
 
 - id: the internal number of the OP
 - extralabel: the kind of OP we deal with, e.g. Station, Junction, Switch, etc.
@@ -76,11 +76,11 @@ The following high level steps are required, to build the demo environment (will
 
 <img width="800" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/791e76740b212686b73230a1cdca851b643bfbe1/images/data-model-all_labels.png">
 
-If you would hide all labels except the label "OperationPoint" and "OperationPointName" and "POI", you will see the basic data model that looks like this:
+If you would hide all labels except the label "OperationalPoint" and "OperationalPointName" and "POI", you will see the basic data model that looks like this:
 
 <img width="540" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/68b41bce4c3ecdd8c73da58f55b7c34790907f4d/images/data-model-with-poi.png">
 
-As you can see now in the data model, there is a OperationPoint label and it is connected to itself with a SECTION relationship. This means, OperationPoints are connected together and make up the rail network (as in the real world). A station (or other Operation Units like Switches, Passenger Stop, etc.) are connected as a separate node by the "NAMED" relationship that represents their name, etc..
+As you can see now in the data model, there is a OperationalPoint label and it is connected to itself with a SECTION relationship. This means, OperationalPoints are connected together and make up the rail network (as in the real world). A station (or other Operational Units like Switches, Passenger Stop, etc.) are connected as a separate node by the "NAMED" relationship that represents their name, etc..
 
 4. Now you can find certain queries in the `./code` directory in the file called `all_queries.cypher` or if you keep on reading. Try them out by cutting and pasting them into the Neo4j browser like shown below. We will also do that in the workshop!
 
@@ -89,40 +89,40 @@ As you can see now in the data model, there is a OperationPoint label and it is 
 
 Let's start with some simple queries. Copy and Paste them into your Neo4j Browser in order to run them.
 
-Show Operation Point Names and limit the number of returned OPs to 10:
+Show Operational Point Names and limit the number of returned OPs to 10:
 ```cypher
-MATCH (op:OperationPointName) RETURN op LIMIT 10;
+MATCH (op:OperationalPointName) RETURN op LIMIT 10;
 ```
 
 Show OPs and limit the number of returned OPs to 50:
 ```cypher
-MATCH (op:OperationPoint) RETURN op LIMIT 50;
+MATCH (op:OperationalPoint) RETURN op LIMIT 50;
 ```
 
-Show OperationPoints and Sections, have a look how those two queries defer!
+Show OperationalPoints and Sections, have a look how those two queries differ!
 ```cypher
-MATCH path=(:OperationPoint)--(:OperationPoint) RETURN path LIMIT 100;
+MATCH path=(:OperationalPoint)--(:OperationalPoint) RETURN path LIMIT 100;
 
-MATCH path=(:OperationPoint)-[:SECTION]->(:OperationPoint) RETURN path LIMIT 100;
+MATCH path=(:OperationalPoint)-[:SECTION]->(:OperationalPoint) RETURN path LIMIT 100;
 ```
 
 using the WHERE clause in two different way:
 ```cypher
-MATCH (op:OperationPoint {id:'SECst'}) RETURN op;
+MATCH (op:OperationalPoint {id:'SECst'}) RETURN op;
 
-MATCH (op:OperationPoint) WHERE op.id='SECst' RETURN op;
+MATCH (op:OperationalPoint) WHERE op.id='SECst' RETURN op;
 ```
 You can start exploring the graph in Neo4j Browser by clicking on the returned node and then clicking on the graph symbol to extend the node and see attached nodes. Go for a couple of sections and see, where it goes to.
 
 Profile and explain some of the queries to see their execution plans:
 ```cypher
-PROFILE MATCH (op:OperationPoint{id:'DE000BL'}) RETURN op;
+EXPLAIN MATCH (op:OperationalPoint  {id:'DE000BL'}) RETURN op;
 
-PROFILE MATCH (op:OperationPoint) WHERE op.id='DE000BL' RETURN op;
+EXPLAIN MATCH (op:OperationalPoint) WHERE op.id='DE000BL' RETURN op;
 
-EXPLAIN MATCH (op:OperationPoint  {id:'DE000BL'}) RETURN op;
+PROFILE MATCH (op:OperationalPoint{id:'DE000BL'}) RETURN op;
 
-EXPLAIN MATCH (op:OperationPoint) WHERE op.id='DE000BL' RETURN op;
+PROFILE MATCH (op:OperationalPoint) WHERE op.id='DE000BL' RETURN op;
 ```
 
 ## Fixing some gaps
@@ -136,40 +136,45 @@ A second gap we found at the Border from Denmark to Germany close to Flensburg. 
 Fixing the Gaps in Denmark:
 ```cypher
 // DK00320 - German border
-MATCH sg=(op1 WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2 WHERE op2.id STARTS WITH 'EU')
-MATCH (op3 WHERE op3.id STARTS WITH 'DK')
-WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) as distance
+MATCH 
+    (op1:OperationalPoint WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
+    (op3:OperationalPoint WHERE op3.id STARTS WITH 'DK')
+WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) AS distance
 ORDER by distance LIMIT 1
-MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
+MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(op2);
 ```
 
 ```cypher
 // DK00200 - Nyborg
-MATCH sg=(op1:OperationPoint WHERE op1.id = 'DK00200'),(op2:OperationPoint)-[:NAMED]->(opn:OperationPointName WHERE opn.name = "Nyborg")
-MERGE (op1)-[:SECTION {sectionlength: point.distance(op1.geolocation, op2.geolocation)/1000.0, fix: true}]->(op2);
+MATCH 
+    (op1:OperationalPoint WHERE op1.id = 'DK00200'),
+    (op2:OperationalPoint)-[:NAMED]->(opn:OperationalPointName WHERE opn.name = "Nyborg")
+MERGE (op1)-[:SECTION {sectionlength: point.distance(op1.geolocation, op2.geolocation)/1000.0, curated: true}]->(op2);
 ```
 
 And also connect the UK via the channel:
 ```cypher
 // EU00228 - FR0000016210 through the channel
-MATCH sg=(op1 WHERE op1.id STARTS WITH 'UK')-[:SECTION]-(op2 WHERE op2.id STARTS WITH 'EU')
-MATCH (op3 WHERE op3.id STARTS WITH 'FR')
+MATCH 
+    (op1:OperationalPoint WHERE op1.id STARTS WITH 'UK')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
+    (op3:OperationalPoint WHERE op3.id STARTS WITH 'FR')
 WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) as distance
 ORDER by distance LIMIT 1
-MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, fix: true}]->(op2);
+MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(op2);
 ```
 
 What you will also recognize is, that there are parts not connected to the railway network. That might be privately used OPs and sections or it also could be an issue of missing data in the data sets of that particular country. This is a way to find them:
 
 ```cypher
-// Find not connected parts for Denmark --> Also try other coutries like DE, FR, IT and so on.
-MATCH path=(a:OperationPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
-WHERE a.id STARTS WITH 'DK'
-RETURN path;
+// Find Operational Points not connected by Sections in Denmark
+MATCH (dk:Denmark:OperationalPoint WHERE NOT EXISTS{(dk)-[:SECTION]-()})
+RETURN dk
+```
 
-// or inside the complete dataset
-MATCH path=(a:OperationPoint WHERE NOT EXISTS{(a)-[:SECTION]-()})
-RETURN path;
+```
+// Find Operational Points not connected by Sections over the whole dataset
+MATCH (op:OperationalPoint WHERE NOT EXISTS{(op)-[:SECTION]-()})
+RETURN op;
 ```
 
 ### Last thing before moving to path analysis
@@ -179,9 +184,11 @@ You can add a technical property to the SECTION relationships that calculates th
 ```cypher
 // Set new traveltime parameter in seconds for a particular section --> requires speed and 
 // sectionlength properties set on this section!
-MATCH (:OperationPoint)-[r:SECTION]->(:OperationPoint)
-WHERE r.speed > 0
-WITH r, r.speed * (1000.0/3600.0) as speed_ms
+MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
+WHERE 
+    r.speed IS NOT NULL 
+    AND r.sectionlength IS NOT NULL
+WITH r, r.speed * (1000.0/3600.0) AS speed_ms
 SET r.traveltime = r.sectionlength / speed_ms
 RETURN count(*);
 ```
@@ -192,13 +199,14 @@ RETURN count(*);
 
 ```cypher
 // Cypher shortest path
-MATCH sg=shortestPath((op1 WHERE op1.id = 'BEFBMZ')-[SECTION*]-(op2 WHERE op2.id = 'DE000BL')) RETURN sg;
+MATCH sg=shortestPath( (op1:OperationalPoint WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL') )
+RETURN sg;
 ```
 
 
 ```cypher
 // APOC Dijkstra shortest path with weight sectionlength
-MATCH (n:OperationPoint), (m:OperationPoint)
+MATCH (n:OperationalPoint), (m:OperationalPoint)
 WHERE n.id = "BEFBMZ" and m.id = "DE000BL"
 WITH n,m
 CALL apoc.algo.dijkstra(n, m, 'SECTION', 'sectionlength') YIELD path, weight
@@ -207,23 +215,34 @@ RETURN path, weight;
 
 ### Graph Data Science (GDS)
 
-Project a graph named 'OperationPoints' into memory. We only take the "OperationPoint " Node and the "SECTION"
-relationship:
+We will be projecting a graph into the GDS [Graph Catalog](https://neo4j.com/docs/graph-data-science/current/management-ops/graph-catalog-ops/) using [Native Projection](https://neo4j.com/docs/graph-data-science/current/management-ops/projections/graph-project/) 
+
+If you want to ensure you have no existing projections you can run the following Cypher to clear your Graph Catalog:
+
 ```cypher
-// CALL gds.graph.drop('OperationPoints'); /// optional
+CALL gds.graph.list() YIELD graphName AS toDrop
+CALL gds.graph.drop(toDrop) YIELD graphName
+RETURN "Dropped " + graphName;
+```
+
+We will project a graph named 'OperationalPoints' into the Graph Catlog. We will take the `OperationalPoint` Node and the `SECTION` Relationship to form a monopartite graph:
+
+```cypher
 CALL gds.graph.project(
-    'OperationPoints',
-    'OperationPoint',
+    'OperationalPoints',
+    'OperationalPoint',
     {SECTION: {orientation: 'UNDIRECTED'}},
     {
         relationshipProperties: 'sectionlength'
     }
 );
 ```
-Now we calculate the shortes path using GDS Dijkstra:
+
+We can calculate the shortest path using GDS Dijkstra:
+
 ```cypher
-MATCH (source:OperationPoint WHERE source.id = 'BEFBMZ'), (target:OperationPoint WHERE target.id = 'DE000BL')
-CALL gds.shortestPath.dijkstra.stream('OperationPoints', {
+MATCH (source:OperationalPoint WHERE source.id = 'BEFBMZ'), (target:OperationalPoint WHERE target.id = 'DE000BL')
+CALL gds.shortestPath.dijkstra.stream('OperationalPoints', {
     sourceNode: source,
     targetNode: target,
     relationshipWeightProperty: 'sectionlength'
@@ -233,21 +252,23 @@ RETURN *;
 ```
 
 Now we use the Weakly Connected Components Algo to identify those nodes that are not well connected to the network:
+
 ```cypher
-CALL gds.wcc.stream('OperationPoints') YIELD nodeId, componentId
-WITH collect(gds.util.asNode(nodeId).id) AS lista, componentId
-RETURN lista,componentId order by size(lista) ASC;
+CALL gds.wcc.stream('OperationalPoints') YIELD nodeId, componentId
+WITH collect(gds.util.asNode(nodeId).id) AS nodes, componentId
+RETURN nodes, componentId 
+ORDER BY size(nodes) ASC;
 ```
 
-Matching a specific OperationPoint  from the list above --> use the Neo4j browser output to check the network it is belonging to (see the README file for more information). You will figure out, that it is an isolated network of OperationPoint s / stations / etc.:
+Matching a specific OperationalPoint  from the list above --> use the Neo4j browser output to check the network it is belonging to (see the README file for more information). You will figure out, that it is an isolated network of OperationalPoint s / stations / etc.:
 ```cypher
-MATCH (op:OperationPoint) WHERE op.id='BEFBMZ' RETURN op;
+MATCH (op:OperationalPoint) WHERE op.id='BEFBMZ' RETURN op;
 ```
 
 Use the betweenness centrality algo, to find out hot spots in terms of
-sections running through a specific OperationPoint .
+sections running through a specific OperationalPoint .
 ```cypher
-CALL gds.betweenness.stream('OperationPoints')
+CALL gds.betweenness.stream('OperationalPoints')
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).id AS id, score
 ORDER BY score DESC;
