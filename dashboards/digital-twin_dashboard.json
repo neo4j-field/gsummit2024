@@ -8,19 +8,19 @@
     "parameters": {
       "neodash_chapter_cityname": "",
       "neodash_countrycode": "UK",
-      "neodash_operationpointname_name_1": "Berlin Hauptbahnhof - Lehrter Bahnhof",
-      "neodash_operationpointname_name_1_display": "Berlin Hauptbahnhof - Lehrter Bahnhof",
+      "neodash_operationalpointname_name_1": "Berlin Hauptbahnhof - Lehrter Bahnhof",
+      "neodash_operationalpointname_name_1_display": "Berlin Hauptbahnhof - Lehrter Bahnhof",
       "neodash_station_name_1": "",
       "neodash_station_name_1_display": "",
-      "neodash_operationpointname_name_2": "München Hbf",
-      "neodash_operationpointname_name_2_display": "München Hbf",
-      "neodash_operationpointname_name_3": "Berlin Hauptbahnhof - Lehrter Bahnhof",
-      "neodash_operationpointname_name_3_display": "Berlin Hauptbahnhof - Lehrter Bahnhof",
+      "neodash_operationalpointname_name_2": "München Hbf",
+      "neodash_operationalpointname_name_2_display": "München Hbf",
+      "neodash_operationalpointname_name_3": "Berlin Hauptbahnhof - Lehrter Bahnhof",
+      "neodash_operationalpointname_name_3_display": "Berlin Hauptbahnhof - Lehrter Bahnhof",
       "neodash_field1": "Speed",
       "neodash_linkFoto": "https://image.jimcdn.com/app/cms/image/transf/none/path/sa6549607c78f5c11/image/i781101d80fd2cd46/version/1606400444/best-hidden-gems-in-germany-bamberg-copyright-feel-good-studio-european-best-destinations.jpg",
       "neodash_speedtime": "traveltime",
-      "neodash_operationpointname_name_4": "Bruxelles-Midi | Brussel-Zuid",
-      "neodash_operationpointname_name_4_display": "Bruxelles-Midi | Brussel-Zuid",
+      "neodash_operationalpointname_name_4": "Bruxelles-Midi | Brussel-Zuid",
+      "neodash_operationalpointname_name_4_display": "Bruxelles-Midi | Brussel-Zuid",
       "neodash_foto": "https://www.followmeaway.com/wp-content/uploads/2020/03/Hidden-Gems-in-Germany-Kamnitz-Gorge.jpg",
       "neodash_web": "https://www.followmeaway.com/hidden-gems-in-germany/"
     },
@@ -32,7 +32,7 @@
       "reports": [
         {
           "title": "Countries in Graph",
-          "query": "MATCH (op:OperationPoint)\nWITH substring(op.id,0,2) AS Countries\nRETURN DISTINCT Countries ORDER BY Countries;\n\n",
+          "query": "MATCH (op:OperationalPoint)\nWITH substring(op.id,0,2) AS Countries\nRETURN DISTINCT Countries ORDER BY Countries;\n\n",
           "width": 3,
           "height": 4,
           "x": 0,
@@ -55,14 +55,14 @@
         },
         {
           "title": "Map on Tracks",
-          "query": "MATCH (op:OperationPoint)\nWHERE op.id STARTS WITH $neodash_countrycode\nRETURN op;\n\n\n",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.id STARTS WITH $neodash_countrycode\nRETURN op;\n\n\n",
           "width": 9,
           "height": 4,
           "x": 3,
           "y": 1,
           "type": "map",
           "selection": {
-            "OperationPoint": "(no label)",
+            "OperationalPoint": "(no label)",
             "BorderPoint": "(no label)",
             "SmallStation": "(no label)",
             "Junction": "(no label)",
@@ -96,7 +96,7 @@
         },
         {
           "title": "Stations in country $neodash_countrycode",
-          "query": "MATCH(op:OperationPoint)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['Station','SmallStation'] \nRETURN count(op); \n\n\n",
+          "query": "MATCH(op:OperationalPoint)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['Station','SmallStation'] \nRETURN count(op); \n\n\n",
           "width": 3,
           "height": 1,
           "x": 3,
@@ -111,7 +111,7 @@
         },
         {
           "title": "Switches in country $neodash_countrycode",
-          "query": "MATCH(op:OperationPoint)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['Switch','Junction'] \nRETURN count(op); \n\n\n",
+          "query": "MATCH(op:OperationalPoint)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['Switch','Junction'] \nRETURN count(op); \n\n\n",
           "width": 3,
           "height": 1,
           "x": 9,
@@ -126,7 +126,7 @@
         },
         {
           "title": "Stop Points in country $neodash_countrycode",
-          "query": "MATCH(op:OperationPoint)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['PassengerStop','PassengerTerminal'] \nRETURN count(op); \n\n\n",
+          "query": "MATCH(op:OperationalPoint)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['PassengerStop','PassengerTerminal'] \nRETURN count(op); \n\n\n",
           "width": 3,
           "height": 1,
           "x": 6,
@@ -141,7 +141,7 @@
         },
         {
           "title": "",
-          "query": "MATCH(op:OperationPoint)-[:NAMED]->(opn:OperationPointName)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['Station','SmallStation'] \nRETURN opn.name AS Station\n\n\n",
+          "query": "MATCH(op:OperationalPoint)-[:NAMED]->(opn:OperationalPointName)\nWHERE op.id STARTS WITH $neodash_countrycode \nAND labels(op)[1] IN ['Station','SmallStation'] \nRETURN opn.name AS Station\n\n\n",
           "width": 3,
           "height": 2,
           "x": 0,
@@ -159,7 +159,7 @@
       "reports": [
         {
           "title": "Start",
-          "query": "MATCH (n:`OperationPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
+          "query": "MATCH (n:`OperationalPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
           "width": 3,
           "height": 1,
           "x": 0,
@@ -168,17 +168,17 @@
           "selection": {},
           "settings": {
             "type": "Node Property",
-            "entityType": "OperationPointName",
+            "entityType": "OperationalPointName",
             "description": "Select a start station",
             "propertyType": "name",
             "propertyTypeDisplay": "name",
-            "parameterName": "neodash_operationpointname_name_1",
+            "parameterName": "neodash_operationalpointname_name_1",
             "id": "1"
           }
         },
         {
           "title": "Destination",
-          "query": "MATCH (n:`OperationPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
+          "query": "MATCH (n:`OperationalPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
           "width": 3,
           "height": 1,
           "x": 3,
@@ -187,11 +187,11 @@
           "selection": {},
           "settings": {
             "type": "Node Property",
-            "entityType": "OperationPointName",
+            "entityType": "OperationalPointName",
             "description": "Select a start station",
             "propertyType": "name",
             "propertyTypeDisplay": "name",
-            "parameterName": "neodash_operationpointname_name_2",
+            "parameterName": "neodash_operationalpointname_name_2",
             "id": "2",
             "overridePropertyDisplayName": false,
             "manualPropertyNameSpecification": true
@@ -199,7 +199,7 @@
         },
         {
           "title": "POIs on your Track",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_1})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_2})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nWITH nodes(path) AS nodeset\nUNWIND nodeset AS nod\nMATCH(nod)-[:HAS_POI]->(p:POI)\nRETURN count(p);",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_1})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_2})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nWITH nodes(path) AS nodeset\nUNWIND nodeset AS nod\nMATCH(nod)-[:HAS_POI]->(p:POI)\nRETURN count(p);",
           "width": 3,
           "height": 1,
           "x": 9,
@@ -231,14 +231,14 @@
         },
         {
           "title": "Shortest Path Track to travel",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_1})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_2})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nRETURN path;\n\n\n",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_1})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_2})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nRETURN path;\n\n\n",
           "width": 6,
           "height": 3,
           "x": 6,
           "y": 1,
           "type": "graph",
           "selection": {
-            "OperationPoint": "id",
+            "OperationalPoint": "id",
             "Station": "id",
             "PassengerStop": "id",
             "Switch": "id",
@@ -250,7 +250,7 @@
         },
         {
           "title": "Trip Length in km",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_1})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_2})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\n\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path, weight as weight\nRETURN weight;",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_1})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_2})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\n\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path, weight as weight\nRETURN weight;",
           "width": 3,
           "height": 1,
           "x": 6,
@@ -260,10 +260,10 @@
           "settings": {
             "nodePositions": {},
             "type": "Node Property",
-            "entityType": "OperationPointName",
+            "entityType": "OperationalPointName",
             "propertyType": "name",
             "propertyTypeDisplay": "name",
-            "parameterName": "neodash_operationpointname_name_3",
+            "parameterName": "neodash_operationalpointname_name_3",
             "id": "3",
             "verticalAlign": "middle",
             "textAlign": "center",
@@ -272,14 +272,14 @@
         },
         {
           "title": "Travel Map",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_1})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_2})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nRETURN path;\n\n\n",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_1})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_2})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nRETURN path;\n\n\n",
           "width": 6,
           "height": 3,
           "x": 0,
           "y": 1,
           "type": "map",
           "selection": {
-            "OperationPoint": "(no label)",
+            "OperationalPoint": "(no label)",
             "Station": "(no label)",
             "PassengerStop": "(no label)",
             "Switch": "(no label)",
@@ -291,7 +291,7 @@
         },
         {
           "title": "POIs on the ride",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_1})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_2})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nWITH nodes(path) AS nodeset\nUNWIND nodeset AS nod\nMATCH(nod)-[:IS_NEAR]->(p:POI)\nRETURN p.city AS City, p.description AS Description, p.linkFoto AS Foto;\n\n\n",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_1})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_2})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nWITH nodes(path) AS nodeset\nUNWIND nodeset AS nod\nMATCH(nod)-[:IS_NEAR]->(p:POI)\nRETURN p.city AS City, p.description AS Description, p.linkFoto AS Foto;\n\n\n",
           "width": 4,
           "height": 4,
           "x": 0,
@@ -333,7 +333,7 @@
       "reports": [
         {
           "title": "Start",
-          "query": "MATCH (n:`OperationPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
+          "query": "MATCH (n:`OperationalPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
           "width": 3,
           "height": 1,
           "x": 0,
@@ -343,16 +343,16 @@
           "settings": {
             "nodePositions": {},
             "type": "Node Property",
-            "entityType": "OperationPointName",
+            "entityType": "OperationalPointName",
             "propertyType": "name",
             "propertyTypeDisplay": "name",
-            "parameterName": "neodash_operationpointname_name_3",
+            "parameterName": "neodash_operationalpointname_name_3",
             "id": "3"
           }
         },
         {
           "title": "Destination",
-          "query": "MATCH (n:`OperationPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
+          "query": "MATCH (n:`OperationalPointName`) \nWHERE toLower(toString(n.`name`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`name` as value,  n.`name` as display ORDER BY size(toString(value)) ASC LIMIT 5",
           "width": 3,
           "height": 1,
           "x": 3,
@@ -362,10 +362,10 @@
           "settings": {
             "nodePositions": {},
             "type": "Node Property",
-            "entityType": "OperationPointName",
+            "entityType": "OperationalPointName",
             "propertyType": "name",
             "propertyTypeDisplay": "name",
-            "parameterName": "neodash_operationpointname_name_4",
+            "parameterName": "neodash_operationalpointname_name_4",
             "id": "4"
           }
         },
@@ -414,14 +414,14 @@
         },
         {
           "title": "Travel by $neodash_speedtime",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_3})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_4})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', $neodash_speedtime) yield path as path\nRETURN path;\n\n\n",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_3})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_4})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', $neodash_speedtime) yield path as path\nRETURN path;\n\n\n",
           "width": 9,
           "height": 4,
           "x": 0,
           "y": 1,
           "type": "map",
           "selection": {
-            "OperationPoint": "(no label)",
+            "OperationalPoint": "(no label)",
             "Station": "(no label)",
             "Switch": "(no label)",
             "PassengerStop": "(no label)",
@@ -438,7 +438,7 @@
         },
         {
           "title": "Travel Distance (km)",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_3})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_4})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', $neodash_speedtime) yield path as path, weight as weight\nWITH relationships(path) AS rels\nUNWIND rels AS rel\nRETURN sum(rel.sectionlength);\n\n\n",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_3})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_4})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', $neodash_speedtime) yield path as path, weight as weight\nWITH relationships(path) AS rels\nUNWIND rels AS rel\nRETURN sum(rel.sectionlength);\n\n\n",
           "width": 3,
           "height": 1,
           "x": 9,
@@ -454,7 +454,7 @@
         },
         {
           "title": "Travel Time (h)",
-          "query": "MATCH (:OperationPointName {name: $neodash_operationpointname_name_3})<-[:NAMED]-(op1:OperationPoint)\nWITH op1.id AS startid\nMATCH (:OperationPointName {name: $neodash_operationpointname_name_4})<-[:NAMED]-(op2:OperationPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationPoint WHERE source.id = startid), (target:OperationPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', $neodash_speedtime) yield path as path, weight as weight\nWITH relationships(path) AS rels\nUNWIND rels AS rel\nRETURN sum(rel.traveltime)/3600;\n\n\n",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_3})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_4})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', $neodash_speedtime) yield path as path, weight as weight\nWITH relationships(path) AS rels\nUNWIND rels AS rel\nRETURN sum(rel.traveltime)/3600;\n\n\n",
           "width": 3,
           "height": 1,
           "x": 9,
