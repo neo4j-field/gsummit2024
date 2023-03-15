@@ -29,7 +29,7 @@ SET
     op.geolocation = Point({latitude: latitude, longitude: longitude})
 WITH op, labels, name
 CALL apoc.create.addLabels( op, labels ) YIELD node
-CREATE (node)-[:NAMED {country: op.country}]->(:OperationalPointName {name: name})
+CREATE (node)-[:NAMED {country: op.country}]->(:OperationalPointName {name: name});
 
 //
 // Chaining up sections
