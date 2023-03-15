@@ -1,25 +1,37 @@
 // 
-// This file is to be executed in the Neo4j Browser
+// To execute this in the Neo4j Browser - copy and paste the contents into the execution box.
+// 
+// This script will add OperationalPoints, Sections and POIs
+//
+// NB. Running this script in it's entirety will erase your database first.
 //
 
-
-// WARNING! This will erase your database contents
+//
+// WARNING! 
+// This erases your database contents
+//
 MATCH (n)
 DETACH DELETE n;
 
-//WARNING! This will DROP all your indexes and constraints
+// 
+// WARNING! 
+// This DROPs all your indexes and constraints
+//
 CALL apoc.schema.assert({},{});
 
+//
 //CREATE a CONSTRAINT to ensure that the 'id' of an Operational Point is both there, and unique.
+//
 CREATE CONSTRAINT uc_OperationalPoint_id IF NOT EXISTS FOR (op:OperationalPoint) REQUIRE (op.id) IS UNIQUE;
 
 //
 // Loading Operational Points
 //
 LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/OperationalPoint_All.csv" AS row
+//This WITH is to ensure our data is as normalized as we can
 WITH
-    trim(row.id) AS id,
-    toFloat(row.latitude) AS latitude,
+    trim(row.id) AS id, //trim will remove and start and trailing spaces from an ID
+    toFloat(row.latitude) AS latitude, //toFloat will 
     toFloat(row.longitude) AS longitude,
     trim(row.name) AS name,
     [] + trim(row.country) + trim(row.extralabel) AS labels,
@@ -30,7 +42,6 @@ SET
 WITH op, labels, name
 CALL apoc.create.addLabels( op, labels ) YIELD node
 CREATE (node)-[:NAMED {country: op.country}]->(:OperationalPointName {name: name});
-
 
 //
 // Load Section Length Data
