@@ -17,13 +17,13 @@ CREATE CONSTRAINT uc_OperationalPoint_id IF NOT EXISTS FOR (op:OperationalPoint)
 // Loading Operational Points
 //
 LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/OperationalPoint_All.csv" AS row
-WITH 
+WITH
     trim(row.id) AS id,
     toFloat(row.latitude) AS latitude,
     toFloat(row.longitude) AS longitude,
-    row.name AS name,
-    [] + row.country + row.extralabel AS labels,
-    row.country AS country
+    trim(row.name) AS name,
+    [] + trim(row.country) + trim(row.extralabel) AS labels,
+    trim(row.country) AS country
 MERGE (op:OperationalPoint {id: id})
 SET
     op.geolocation = Point({latitude: latitude, longitude: longitude})
@@ -31,8 +31,9 @@ WITH op, labels, name
 CALL apoc.create.addLabels( op, labels ) YIELD node
 CREATE (node)-[:NAMED {country: op.country}]->(:OperationalPointName {name: name});
 
+
 //
-// Chaining up sections
+// Load Section Length Data
 //
 LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/SECTION_ALL_Length.csv" AS row
 WITH
@@ -57,26 +58,12 @@ MATCH (target:OperationalPoint WHERE target.id = targetId)
 MERGE (source)-[s:SECTION]->(target)
 SET s.speed = speed;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//NOT CHANGED/CHECKED BELOW YET!!!!!
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// Create one more index for the Operation Point name
+// Create index for the Operation Point name
 CREATE INDEX index_OperationalPointName_name IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.name);
 
 //
-// Loading Point of Interest and matching the closest station automtically
-// by finding the closest distance between geo point of the POI and the next
-// available station / passenger stop geo point
+// Load Point of Interest data
 //
-
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/POIs.csv' AS row
 WITH 
     row.CITY AS city,
@@ -86,23 +73,27 @@ WITH
     row.LAT AS lat,
     row.LONG AS long,
     row.SECRET AS secret
-CREATE (po:POI {geolocation:point({latitude: toFloat(lat),longitude: toFloat(long)})})
-SET 
-    po.description = description,
-    po.city = city,
-    po.linkWebSite = linkWeb,
-    po.linkFoto = linkFoto,
-    po.long = toFloat(long),
-    po.lat = toFloat(lat),
-    po.secret = toBoolean(secret);
+CREATE (po:POI {
+    geolocation : point({latitude: toFloat(lat),longitude: toFloat(long)}),
+    description : description,
+    city : city,
+    linkWebSite : linkWeb,
+    linkFoto : linkFoto,
+    long : toFloat(long),
+    lat : toFloat(lat),
+    secret : toBoolean(secret)
+});
 
-
-MATCH (poi:POI)
-MATCH (op:OperationalPoint) 
-WHERE "Station" IN labels(op) or "SmallStation" IN labels(op)
+//
+// Link POI to nearest OperationalPoint that is a Station or SmallStation
+// by finding the closest distance between `geolocation` point of the POI and the next
+// available station / passenger stop `geolocation` point
+//
+MATCH 
+    (poi:POI), 
+    (op:Station|SmallStation) 
 WITH 
-    poi, 
-    op, 
+    poi, op, 
     point.distance(poi.geolocation, op.geolocation) AS distance
 ORDER BY distance
 WITH poi, COLLECT(op)[0] AS closest
