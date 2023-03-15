@@ -1,78 +1,85 @@
 # Graph Summit 2023 EMEA - Workshop Digital Twin
 
-This repository contains the workshop material used during the **Graph Summit 2023 - Building a Graph Solution Workshop**. All code, data, dashboards, Bloom perspectives and slides are available for dowload and free to use.
+This repository contains the material used during the **Graph Summit 2023 - Building a Graph Solution Workshops**. 
 
-The aim of the workshop was, to provide a structure way of build a small mini digital twin knowledge graph. It is supposed to answer some basic questions coming from the business and discusses futher, how such digital twin graph could be extended for more insights and business values.
+The aim of the workshop is to provide a structured way to build a small Digital Twin Knowledge Graph. It answers questions from a business perspective and discusses how a Digital Twin graph could be extended for more insights and values.
 
-The workshop was build with "Graphistas" in mind new to the Graph Database / Analytics arena or "Graphistas" with a foundational knowledge of Graph databases and Graph Analytics searching for another nice example of the value of graph. 
-It provides a playground for further experiments or can be used to "advertise" the value of Neo4j Graph Data Platform inside your company or government agency. Thanks for trying it out!
+It provides an environment for further experiments and can be used to show the value of Neo4j Graph Data Platform within your own organisation.
 
-#### About the data that is been used
+### Target Audience
 
-The datasets used here, describes a network of railroad sections and places (so called operation points) 
-connected by so called sections. Operational Points can be a variaty of places like a Stations, a Switches, etc., see more examples below.
-
-The dataset is essentailly a "small" digital twin of the existing rail network in the EU countries.
-
-The dataset is freely available on the portal of the *European Union Agency for Railways and can be downloaded from their webpage. It offers many more parameters, e.g. type of power source and many more. We are not using all available parameters in this workshop, to keep it's complexity low. Data download is available in different formats e.g. xml or XLMS and we had to convert them into CSV to make loading more comfortable with cypher statements.
-
-- [Original Section/Operational Point Data](https://data-interop.era.europa.eu/search) comes from the European Union Agency for Railways.
+The workshop is intended for those who:
+* Are new to Graph Databases or Graph Analytics,
+* Have experience of Graph Databases or Graph Analytics who are looking for a different example of the value of Graph,
 
 ---
-## Explaining the data set
+## About the data
 
-#### Sections
+The data used describes a static rail network, consisting of **Sections** of lines and **Operational Points** (OP) that are connected to those Sections.
 
-Sections are parts of the railway network and have a start and end point. Start and end points are operational points of various types like Stations, Switches, Junctions, etc.
+The dataset is freely available on the Register of Infrastructure (RINF) portal of the [European Union Agency for Railways](https://data-interop.era.europa.eu/) and can be downloaded from their webpage.
 
-The Sections have the following interesting **Properties** loaded to the Graph:
+The format of the data has been converted to a Comma Seperated Values (`CSV`) format for expediency in the workshop.
 
-- source: start OP for this section
-- target: end OP for this section
-- sectionlength: the length in km of that section
-- sectionspeed: max speed allowed on that section
+### Operational Points
+Operational Points are the start and end points of a Section. 
 
-#### Operational Points
+There are many types of Operational Points, including:
+* Stations, 
+* Small Stations, 
+* Passenger Stops, 
+* Switches, 
+* Junctions,
 
-Operational Points are connecting the different sections and can be of various types. Some of which are Stations, Small Stations, Passenger Stops, Switches, Junctions and some more.
+Operational Points have the following properties:
 
-Operational Points have the following **Properties** loaded to the Graph:
+- `id`: A unique identifier
+- `extralabel`: The type of the OP
+- `name`: The name of the OP
+- `latitude`: The latitude of the OP
+- `longtitude`: The longitude of the OP
 
-- id: the internal number of the OP
-- extralabel: the kind of OP we deal with, e.g. Station, Junction, Switch, etc.
-- name: the name of an OP
-- latitude: of the OP
-- longtitude: of the OP
+### Sections
 
-Other data is available from the EU portal, but not used in this workshop as mentioned above.
+Sections are parts of the railway network and have a start and end point.
 
-#### Point of Interests (POI)
+Sections have the following properties:
 
-POIs are distributed through the countries and refer to either a main station (and so to a city), or to a station that is closest by the POI. Reason is, that some POIs are in the country side and there is no station close by. POIs have the following interesting **Properties** loaded to the Graph:
+- `source`: start OP for this section
+- `target`: end OP for this section
+- `sectionlength`: the length in km of that section
+- `trackspeed`: max speed allowed on that section
 
-- CITY: City name at or close to the POI
-- POI_DESCRIPTION: A short description of the POI
-- LINK_FOTO: A URL to a POI Foto
-- LINK_WEBSITE: A URL to a Website discussing POIs
-- LAT: Latidude of the POI
-- LONG: Longditude of the POI
-- SECRET: Is the a well know POI (False) or more a secret place (True)
+### Point of Interests (POI)
 
-NOTE: POIs are not taken from the EU Railway Agency portal, but manually curated as an additional fun factor of the workshop.
+A point of interest (POI) is a specific point location that someone may find useful or interesting. For example, the Eiffel Tower, or Big Ben. 
+
+POIs have the following properties:
+
+- `CITY`: City name at or close to the POI
+- `POI_DESCRIPTION`: A short description of the POI
+- `LINK_FOTO`: A URL to a POI Foto
+- `LINK_WEBSITE`: A URL to a Website discussing POIs
+- `LAT`: Latidude of the POI
+- `LONG`: Longditude of the POI
+
+> NOTE: POIs are not taken from the RINF portal
 
 ---
 
 
 ## Building the demo environment
 
-The following high level steps are required, to build the demo environment (will be shown in the workshop):
+The following high level steps are required, to build the demo environment:
 
-1. Download and install [Neo4j Desktop](https://neo4j.com/download-center/). Since we use some Graph Data Science Algorithms during the demo, we require the **GDS Library** to be installed. **Installation instruction** can be found [here](https://neo4j.com/docs/desktop-manual/current/).
-- As an alternative, you can run an [Neo4j Sandbox for Data Scientists](https://sandbox.neo4j.com/?ref=neo4j-home-hero&persona=data-scientist) from (https://sandbox.neo4j.com/ and use an "Blank Sandbox" as shown in the slides.
+1. Create a Neo4j Graph instance via any of:
+    1. [Neo4j Desktop](https://neo4j.com/download-center/). 
+        - If you are using Neo4j Desktop, you will need to ensure that both GDS and APOC are added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
+    2. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
 
-2. Open Neo4j Browser and run the load-all-data.cypher script from the code directory above. You can cut & paste the complete code into the Neo4j Browser command line.
+2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
 
-3. After the script has finished loading, you can check your data model. Run the command ```CALL db.schema.virtualization```in your Browser console. It should look like the following (maybe yours is a bit more mixed up):
+3. After the script has finished loading, you can check your data model. Run the command `CALL db.schema.virtualization` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
 
 <img width="800" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/791e76740b212686b73230a1cdca851b643bfbe1/images/data-model-all_labels.png">
 
