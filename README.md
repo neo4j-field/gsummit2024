@@ -94,16 +94,22 @@ The name of an `OperationPoint` has been extracted to the `OperationalPointName`
 ---
 ## Run some Cypher queries on your Graph (database)
 
-> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/all_queries.cypher) file. For the workshop we will be running through the contents of this readme.
+> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/all_queries.cypher) file. 
+>
+> For the workshop we will be running through the contents of this readme.
 
-Let's start with some simple queries. Copy and Paste them into your Neo4j Browser in order to run them.
+All the queries are intended to be run in the Neo4j Browser query window. Please Copy & Paste them to execute them.
 
-Show Operational Point Names and limit the number of returned OPNs to 10:
+### Simple Queries
+
+This query will get `10` random `OperationalPointName` Nodes from the database, returning them to the browser.
+
 ```cypher
 MATCH (op:OperationalPointName) RETURN op LIMIT 10;
 ```
 
-Show Operational Points and limit the number of returned OPs to 50:
+This query will get `50` random `OperationalPoint` Nodes from the database, returning them to the browser.
+
 ```cypher
 MATCH (op:OperationalPoint) RETURN op LIMIT 50;
 ```
@@ -206,6 +212,10 @@ RETURN count(*);
 
 ### Shortest Path Queries using different Shortest Path functions in Neo4j
 
+# *********************** NOTE TO CHARLOTTE ***************
+# USE NAMES
+# *********************** NOTE TO CHARLOTTE ***************
+
 ```cypher
 // Cypher shortest path
 MATCH sg=shortestPath( (op1:OperationalPoint WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL') )
@@ -221,6 +231,11 @@ WITH n,m
 CALL apoc.algo.dijkstra(n, m, 'SECTION', 'sectionlength') YIELD path, weight
 RETURN path, weight;
 ```
+---
+
+# *********************** NOTE TO JOE ***************
+# GDS!!!
+# *********************** NOTE TO JOE ***************
 
 ### Graph Data Science (GDS)
 
