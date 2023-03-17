@@ -67,7 +67,6 @@ POIs have the following properties:
 
 ---
 
-
 ## Building the demo environment
 
 The following high level steps are required, to build the demo environment:
@@ -89,10 +88,10 @@ If you hid all the labels with the exception of `OperationalPoint`, `Operational
 
 As you can see now in the data model, there is an `OperationalPoint` label and it is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network (as in the real world).
 
-The name of an `OperationPoint` has been extracted to the `OperationalPointName` node because there are `OperationalPoint`s with multiple names. These are typically `BorderPoint`s where each country has a different name for the `BorderPoint`. For example, the `BorderPoint` between Sweden and Denmark has the names 'Peberholm gränsen' (Sweden), and 'Peberholm grænse' (Denmark).
+> The name of an `OperationalPoint` has been extracted to the `OperationalPointName` node because there are `OperationalPoint`s with multiple names. These are typically `BorderPoint`s where each country has a different name for the `BorderPoint`. For example, the `BorderPoint` between Sweden and Denmark has the names 'Peberholm gränsen' (Sweden), and 'Peberholm grænse' (Denmark).
 
 ---
-## Run some Cypher queries on your Graph (database)
+## Run some Cypher queries on your Graph 
 
 > You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/all_queries.cypher) file. 
 >
@@ -100,144 +99,287 @@ The name of an `OperationPoint` has been extracted to the `OperationalPointName`
 
 All the queries are intended to be run in the Neo4j Browser query window. Please Copy & Paste them to execute them.
 
-### Simple Queries
+You might find the [Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-sheet/current/) useful when following along, especially if you want to write your own queries, but it is not necessary for following along below.
+
+---
+## Simple Queries
 
 This query will get `10` random `OperationalPointName` Nodes from the database, returning them to the browser.
 
 ```cypher
-MATCH (op:OperationalPointName) RETURN op LIMIT 10;
+MATCH (opn:OperationalPointName) 
+RETURN opn 
+LIMIT 10;
 ```
+
+If you double click on one the returned Nodes, you will see you get taken to an actual `OperationalPoint`. If you have a `BorderPoint` you might find it has two `OperationalPointName` nodes. 
 
 This query will get `50` random `OperationalPoint` Nodes from the database, returning them to the browser.
 
 ```cypher
-MATCH (op:OperationalPoint) RETURN op LIMIT 50;
+MATCH (op:OperationalPoint) 
+RETURN op 
+LIMIT 50;
 ```
 
-Show OperationalPoints and Sections, have a look how those two queries differ!
-```cypher
-MATCH path=(:OperationalPoint)--(:OperationalPoint) RETURN path LIMIT 100;
-
-MATCH path=(:OperationalPoint)-[:SECTION]->(:OperationalPoint) RETURN path LIMIT 100;
-```
-
-using the WHERE clause in two different way:
-```cypher
-MATCH (op:OperationalPoint {id:'SECst'}) RETURN op;
-
-MATCH (op:OperationalPoint) WHERE op.id='SECst' RETURN op;
-```
-You can start exploring the graph in Neo4j Browser by clicking on the returned node and then clicking on the graph symbol to extend the node and see attached nodes. Go for a couple of sections and see, where it goes to.
-
-Profile and explain some of the queries to see their execution plans:
-```cypher
-EXPLAIN MATCH (op:OperationalPoint  {id:'DE000BL'}) RETURN op;
-
-EXPLAIN MATCH (op:OperationalPoint) WHERE op.id='DE000BL' RETURN op;
-
-PROFILE MATCH (op:OperationalPoint{id:'DE000BL'}) RETURN op;
-
-PROFILE MATCH (op:OperationalPoint) WHERE op.id='DE000BL' RETURN op;
-```
-
-## Fixing some gaps
-
-Before we move on running some more complex queries we figured, there are gaps in some of the sections in Denmark. Maybe otheres also have gaps, but we did not yet find them.
-
-Trying to do a shortest Path between Stockholm and Berlin, did not work initially. With some trail and error wie figured, there were two gaps on the way from Stockholm (id: 'SECst') and Berlin Main Station (id: 'DE000BL'). The gaps were between Nyborg with id DK00039 and OP DK00200. 
-
-A second gap we found at the Border from Denmark to Germany close to Flensburg. The BorderPoint did not have a connection to both railway networks of Denmark and Germany. We fixed that with the following queries:
-
-Fixing the Gaps in Denmark:
-```cypher
-// DK00320 - German border
-MATCH 
-    (op1:OperationalPoint WHERE op1.id STARTS WITH 'DE')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
-    (op3:OperationalPoint WHERE op3.id STARTS WITH 'DK')
-WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) AS distance
-ORDER by distance LIMIT 1
-MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(op2);
-```
+If you are working in the EU Rail Network, the `id` property might be something you are familiar with, but the `OperationPointName` is the more friendly name. You can see if you double click on one of these, you _should_ find `SECTION` relationships joining the `OperationalPoint` to another. If it isn't - this is an indication of data quality. This might be something you would want to check on a regular basis, a query for orphaned nodes for example.
 
 ```cypher
-// DK00200 - Nyborg
-MATCH 
-    (op1:OperationalPoint WHERE op1.id = 'DK00200'),
-    (op2:OperationalPoint)-[:NAMED]->(opn:OperationalPointName WHERE opn.name = "Nyborg")
-MERGE (op1)-[:SECTION {sectionlength: point.distance(op1.geolocation, op2.geolocation)/1000.0, curated: true}]->(op2);
+MATCH (op:OperationalPoint)
+WHERE NOT EXISTS ( (op)-[:SECTION]-() )
+RETURN COUNT(op);
 ```
 
-And also connect the UK via the channel:
+We don't want that kind of data in our Graph as it could cause problems when we want to do things like Community Detection, and keeping our data as clean as possible is a goal we should have.
+
+```
+MATCH (op:OperationalPoint)-[NAMED]->(opn:OperationalPointName)
+WHERE NOT EXISTS ( (op)-[:SECTION]-() )
+DETACH DELETE op, opn
+```
+
+We used something called `DETACH DELETE` here - the reason for this is that Neo4j doesn't allow for 'hanging' relationships - i.e. relationships that don't have a start or end point (or neither) - and by `DETACH` we are telling Neo4j to delete the relationships as well. If you didn't have `DETACH` you would get an error when Neo4j attempted to execute it.
+
+So far we have only looked at how to query the Nodes, so let's run a query to find some `OperationalPoint`s _and_ the Relationships that connect them.
+
+The first query uses `--` to signify the relationship, and that means a couple of things:
+* It is undirected - we don't mind which way the relationship goes
+* It can be _any_ type - if we had Relationship types _other_ than `SECTION` between `OperationalPoint`s in our Graph we would return those as well
+
 ```cypher
-// EU00228 - FR0000016210 through the channel
-MATCH 
-    (op1:OperationalPoint WHERE op1.id STARTS WITH 'UK')-[:SECTION]-(op2:OperationalPoint WHERE op2.id STARTS WITH 'EU'),
-    (op3:OperationalPoint WHERE op3.id STARTS WITH 'FR')
-WITH op2, op3, point.distance(op3.geolocation, op2.geolocation) as distance
-ORDER by distance LIMIT 1
-MERGE (op3)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(op2);
+MATCH path=(:OperationalPoint)--(:OperationalPoint) 
+RETURN path 
+LIMIT 100;
 ```
 
-What you will also recognize is, that there are parts not connected to the railway network. That might be privately used OPs and sections or it also could be an issue of missing data in the data sets of that particular country. This is a way to find them:
+In order to make our query future proof, and more performant, we should add the type of the Relationship, and the Direction - `-[:SECTION]->` this helps in both senses as:
+* The Type means that if in the future someone _does_ add a new relationship type, our query _still_ returns what we expect it to
+* The Query Planner doesn't need to check every relationship coming from an `OperationalPoint` to see what is at the other end
 
 ```cypher
-// Find Operational Points not connected by Sections in Denmark
-MATCH (dk:Denmark:OperationalPoint WHERE NOT EXISTS{(dk)-[:SECTION]-()})
-RETURN dk
+MATCH path=(:OperationalPoint)-[:SECTION]->(:OperationalPoint) 
+RETURN path 
+LIMIT 100;
 ```
 
-```
-// Find Operational Points not connected by Sections over the whole dataset
-MATCH (op:OperationalPoint WHERE NOT EXISTS{(op)-[:SECTION]-()})
+## Filtering Queries
+
+There are three broad ways to filter our queries:
+* Inline property matching
+* Inline `WHERE`
+* `WHERE`
+
+### Inline property matching
+
+This is only useful for exact matching, i.e. the `id` _is_ `'SECst'` (for example).
+
+```cypher
+MATCH (op:OperationalPoint {id:'SECst'}) 
 RETURN op;
 ```
 
-### Last thing before moving to path analysis
+### Inline `WHERE`
 
-You can add a technical property to the SECTION relationships that calculates the time of travel on that section. It assumes, the train is going the max speed for that section. A query to add that is the following:
+You can still do exact matching (as shown below), but by using `WHERE` you have the ability to also do things like:
+* `CONTAINS`
+* `STARTS WITH`
+* `ENDS WITH`
+* `>=`
+* `<=`
+* etc
 
 ```cypher
-// Set new traveltime parameter in seconds for a particular section --> requires speed and 
-// sectionlength properties set on this section!
+MATCH (op:OperationalPoint WHERE op.id='SECst') 
+RETURN op;
+```
+
+### WHERE
+
+This is exactly the same (in terms of what you can do) as the 'Inline `WHERE`' clause, it's just at a different position in the query, and largely the choice of what you want to use is a personal one. They are _all_ equally performant.
+
+```cypher
+MATCH (op:OperationalPoint) 
+WHERE op.id='SECst' 
+RETURN op;
+```
+
+## Profiling
+How do we _know_ they are all the same though? Neo4j & Cypher allow us to `PROFILE` or `EXPLAIN` our queries. 
+* `EXPLAIN` allows us to see what the Query Planner _thinks_ it will do, without executing the query - this is useful when we have a query that is maybe taking a long time to run and we want to see if there is a reason.
+* `PROFILE` actually executes the query and returns back to us the plan that was _actually_ used, including the metrics of how much of the database was 'hit'
+
+First we'll `EXPLAIN` our 'Inline property match' query:
+
+```cypher
+EXPLAIN
+MATCH (op:OperationalPoint {id:'SECst'}) 
+RETURN op;
+```
+
+We get a plan returned, saying we're doing a `NodeUniqueIndexSeek`, followed by a `ProduceResults` and then the result. There is no way to check the actual performance, as it hasn't actually run the query.
+
+If we now `PROFILE` the same query:
+
+```cypher
+PROFILE
+MATCH (op:OperationalPoint {id:'SECst'}) 
+RETURN op;
+```
+
+We get the _same_ plan back, this time with the number of 'db hits' and if we look at the bottom left hand side of the query window, we should see something like:
+
+`Cypher version: , planner: COST, runtime: PIPELINED. 5 total db hits in 2 ms.`
+
+>### Sidenote: What is a 'db hit'?
+>A 'db hit' is an abstract metric to give you a comparative figure to see how one query compares to another. 
+
+Now, we can `PROFILE` our other filter queries to compare them, first the 'Inline `WHERE`'
+
+```cypher
+PROFILE
+MATCH (op:OperationalPoint WHERE op.id='SECst')
+RETURN op;
+```
+
+And then the other `WHERE`
+
+
+```cypher
+PROFILE
+MATCH (op:OperationalPoint) 
+WHERE op.id='SECst' 
+RETURN op;
+```
+
+For all 3 you should see the _same_ plan and performance, which reinforces the view that you can choose whichever style suits you!
+
+## Data Integrity
+
+We already found, and dealt with orphaned (or disconnected) Nodes, but what if there are gaps in the networks that we need to fill. For example, the Channel Tunnel connects France to the UK, but if we run an exploratory query on our dataset:
+
+```cypher
+MATCH path=( (uk:UK)-[:SECTION]-(france:France) )
+RETURN path 
+LIMIT 1
+```
+
+We get no results, as there is no way in our current data set to get from the UK to France or indeed Denmark to Germany.
+
+This is a good example of knowing your Domain, and investigating your dataset for problems from the context of your knowledge. For example, a domain expert might know you _can_ get a train from Stockholm to Berlin, but querying it gets no results:
+
+```cypher
+MATCH 
+    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
+    (:OperationalPointName {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})<-[:NAMED]-(berlin:OperationalPoint)
+WITH stockholm, berlin
+MATCH p= ((stockholm)-[:SECTION]-(berlin))
+RETURN p 
+LIMIT 1
+```
+
+In this query we take advantage of the fact that we have `BorderPoint`s and our Node's have their Country as a label to find all the `BorderPoint`s in Germany, then all the `OperationalPoint`s in Denmark and find the two that are closest together.
+
+This query doesn't _necessarily_ generate the _right_ border crossing, but for the purposes of this workshop it is adequate. This is a point where Domain Knowledge would come in to play.
+
+```cypher
+MATCH 
+    (germany:BorderPoint:Germany),
+    (denmark:Denmark)
+WITH 
+    germany, denmark, 
+    point.distance(germany.geolocation, denmark.geolocation) AS distance
+ORDER BY distance LIMIT 1
+MERGE (germany)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(denmark);
+```
+
+The UK / France border crossing is equally as simple, and shows that by using multiple labels we can simplify our queries dramatically.
+
+```cypher
+MATCH 
+    (uk:UK:BorderPoint),
+    (france:France)
+WITH 
+    uk, france, 
+    point.distance(france.geolocation, uk.geolocation) as distance
+ORDER by distance LIMIT 1
+MERGE (france)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(uk);
+```
+
+The 'Sweden to Berlin' problem is more complicated, as, the gap occurs in Denmark between two Danish `OperationalPoint`s, 'Nyborg' and 'Hjulby' - so we need to find them by name instead.
+
+```cypher
+MATCH 
+    (:OperationalPointName {name: 'Nyborg'})<-[:NAMED]-(nyborg:OperationalPoint),
+    (:OperationalPointName {name: 'Hjulby'})<-[:NAMED]-(hjulby:OperationalPoint)-[:NAMED]->
+MERGE (nyborg)-[:SECTION {sectionlength: point.distance(nyborg.geolocation, hjulby.geolocation)/1000.0, curated: true}]->(hjulby);
+```
+
+## Adding properties globally
+
+At the moment, we store the `sectionlength` (in KM) and `speed` (in KPH) properties on the `SECTION` relationship, we can use these together to work out the _best_ time we could take to cross this section on the fly:
+
+```
+MATCH (o1:OperationalPointName)<-[:NAMED]-(s1:Station)-[s:SECTION]->(s2:Station)-[:NAMED]->(o2:OperationalPointName)
+WHERE 
+    NOT (s.speed IS NULL) 
+    AND NOT (s.sectionlength IS NULL )
+WITH 
+    o1.name AS startName, o2.name AS endName,
+    (s.sectionlength / s.speed) * 60 * 60 AS timeTakenInSeconds
+    LIMIT 1
+WITH startName, endName, timeTakenInSeconds
+RETURN *
+```
+
+But that's going to be inefficient, when we need to calculate a _lot_ of `SECTION`s on a route, so we can 'pre-calculate' across all our `SECTION` relationships that have the required properties:
+
+```cypher
 MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
 WHERE 
     r.speed IS NOT NULL 
     AND r.sectionlength IS NOT NULL
-WITH r, r.speed * (1000.0/3600.0) AS speed_ms
-SET r.traveltime = r.sectionlength / speed_ms
-RETURN count(*);
+SET r.traveltime = (r.sectionlength / r.speed) * 60 * 60
 ```
-**IMPORTANT** the above query needs to run for the NeoDash Dashboard to run entirely!
 
+> **IMPORTANT** To be able to use the [NeoDash dashboard](https://raw.githubusercontent.com/cskardon/gsummit2023/main/dashboards/digital-twin_dashboard.json) in this repository fully, you will need to execute this query.
 
-### Shortest Path Queries using different Shortest Path functions in Neo4j
+## Shortest Path Queries using different Shortest Path functions in Neo4j
 
-# *********************** NOTE TO CHARLOTTE ***************
-# USE NAMES
-# *********************** NOTE TO CHARLOTTE ***************
+In these queries, we're going to look at finding the Shortest Path from Brussels to Berlin. 
+
+This query will find the shortest number of hops between `OperationalPoint`s, irregardless of the distance that would be travelled.
 
 ```cypher
 // Cypher shortest path
-MATCH sg=shortestPath( (op1:OperationalPoint WHERE op1.id = 'BEFBMZ')-[:SECTION*]-(op2:OperationalPoint WHERE op2.id = 'DE000BL') )
-RETURN sg;
+MATCH 
+    (:OperationalPointName {name:'Bruxelles-Midi | Brussel-Zuid'})<-[:NAMED]-(brussels:OperationalPoint),
+    (:OperationalPointName {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})<-[:NAMED]-(berlin:OperationalPoint)
+WITH brussels, berlin
+MATCH path = shortestPath ( (brussels)-[:SECTION*]-(berlin) )
+RETURN path
 ```
 
+For this use case, we would be better off using the `sectionlength` properties of the `SECTION` relationships to get the shortest path that a Train would need to travel.
 
 ```cypher
 // APOC Dijkstra shortest path with weight sectionlength
-MATCH (n:OperationalPoint), (m:OperationalPoint)
-WHERE n.id = "BEFBMZ" and m.id = "DE000BL"
-WITH n,m
-CALL apoc.algo.dijkstra(n, m, 'SECTION', 'sectionlength') YIELD path, weight
+MATCH 
+    (:OperationalPointName {name:'Bruxelles-Midi | Brussel-Zuid'})<-[:NAMED]-(brussels:OperationalPoint),
+    (:OperationalPointName {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})<-[:NAMED]-(berlin:OperationalPoint)
+WITH brussels, berlin
+CALL apoc.algo.dijkstra(brussels, berlin, 'SECTION', 'sectionlength') YIELD path, weight
 RETURN path, weight;
 ```
+
+NB. This doesn't mean it's the fastest route, as we've not taken into account the speed of the `SECTION` relationship - and it might be the case that the `SECTION` whilst short, is in fact slow.
+
 ---
 
 # *********************** NOTE TO JOE ***************
 # GDS!!!
 # *********************** NOTE TO JOE ***************
 
-### Graph Data Science (GDS)
+## Graph Data Science (GDS)
 
 We will be projecting a graph into the GDS [Graph Catalog](https://neo4j.com/docs/graph-data-science/current/management-ops/graph-catalog-ops/) using [Native Projection](https://neo4j.com/docs/graph-data-science/current/management-ops/projections/graph-project/) 
 
@@ -249,7 +391,7 @@ CALL gds.graph.drop(toDrop) YIELD graphName
 RETURN "Dropped " + graphName;
 ```
 
-We will project a graph named 'OperationalPoints' into the Graph Catlog. We will take the `OperationalPoint` Node and the `SECTION` Relationship to form a monopartite graph:
+We will project a graph named 'OperationalPoints' into the Graph Catalog. We will take the `OperationalPoint` Node and the `SECTION` Relationship to form a monopartite graph:
 
 ```cypher
 CALL gds.graph.project(
@@ -297,4 +439,5 @@ YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).id AS id, score
 ORDER BY score DESC;
 ```
-There is much more you can do, using this data set. This is just a teaser and we hope you have some more queries you find and test.
+
+
