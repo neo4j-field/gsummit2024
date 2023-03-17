@@ -327,8 +327,7 @@ WITH
     o1.name AS startName, o2.name AS endName,
     (s.sectionlength / s.speed) * 60 * 60 AS timeTakenInSeconds
     LIMIT 1
-WITH startName, endName, timeTakenInSeconds
-RETURN *
+RETURN startName, endName, timeTakenInSeconds
 ```
 
 But that's going to be inefficient, when we need to calculate a _lot_ of `SECTION`s on a route, so we can 'pre-calculate' across all our `SECTION` relationships that have the required properties:
