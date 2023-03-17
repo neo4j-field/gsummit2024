@@ -86,7 +86,7 @@ If you hid all the labels with the exception of `OperationalPoint`, `Operational
 
 <img width="540" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/68b41bce4c3ecdd8c73da58f55b7c34790907f4d/images/data-model-with-poi.png">
 
-As you can see now in the data model, there is an `OperationalPoint` label and it is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network (as in the real world).
+The model shows that we have an `OperationalPoint` Node that is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network .
 
 > The name of an `OperationalPoint` has been extracted to the `OperationalPointName` node because there are `OperationalPoint`s with multiple names. These are typically `BorderPoint`s where each country has a different name for the `BorderPoint`. For example, the `BorderPoint` between Sweden and Denmark has the names 'Peberholm gränsen' (Sweden), and 'Peberholm grænse' (Denmark).
 
@@ -132,7 +132,7 @@ RETURN COUNT(op);
 
 We don't want that kind of data in our Graph as it could cause problems when we want to do things like Community Detection, and keeping our data as clean as possible is a goal we should have.
 
-```
+```cypher
 MATCH (op:OperationalPoint)-[NAMED]->(opn:OperationalPointName)
 WHERE NOT EXISTS ( (op)-[:SECTION]-() )
 DETACH DELETE op, opn
