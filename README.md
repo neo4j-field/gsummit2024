@@ -387,6 +387,8 @@ CALL gds.graph.project(
 );
 ```
 
+### Path Finding
+
 We can calculate the shortest path between two stations - for example, Malmö Central to Stockholm Central - using our `traveltime` relatonship weights and the [Dijkstra Source-Target Shortest Path](https://neo4j.com/docs/graph-data-science/current/algorithms/dijkstra-source-target/) algorithm from the GDS library.  Note that bad data in our dataset (such as `null` or `zero` relationship weights) can cause strange results when calculating weighted shortest paths.
 
 ```cypher
@@ -417,6 +419,8 @@ YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN *;
 ```
 
+### Community Detection
+
 Now we use the [Weakly Connected Components](https://neo4j.com/docs/graph-data-science/current/algorithms/wcc/) algorithm in 'stream' mode to review `OperationalPoint`s that are _not_ well connected to the network:
 
 ```cypher
@@ -432,12 +436,12 @@ We can also write the Weakly Connected Components community identifiers back to 
 CALL gds.wcc.write('OperationalPoints', {writeProperty: 'componentId'});
 ```
 
-We should index our new Weakly Connected Components id property, so that we can query with it in a performant way:
+We should index our new Weakly Connected Components `id` property, so that we can query with it in a performant way:
+
 ```cypher
 CREATE INDEX index_OperationalPointName_componentid IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.componentId);
 ```
 
-Matching a specific OperationalPoint and reviewing the other members of its community. You should see that it belongs to an isolated group of OperationalPoints.
 Matching a specific `OperationalPoint` and reviewing the other members of its community. You should see that it belongs to an isolated group of `OperationalPoint`s.
 
 ```cypher
@@ -446,6 +450,8 @@ WITH op.componentId as component
 MATCH path = (:OperationalPoint {componentId: component})-[:SECTION]->()
 RETURN path
 ```
+
+### Centrality
 
 Using the [Degree Centrality](https://neo4j.com/docs/graph-data-science/current/algorithms/degree-centrality/) algorithm we can identify important nodes in the graph based on how many `SECTION` relationships they have.
 Nodes with a high Degree Centrality score represent `OperationalPoint`s which are important transfer points in our network.
@@ -480,13 +486,17 @@ We should also write the Betweenness Centrality scores back to the database so w
 CALL gds.betweenness.write('OperationalPoints', {writeProperty: 'betweennessScore'})
 ```
 
-Let's also index our new Degree and Betweenness Centrality score properties, so that we can query using them in a performant way:
+Let's also index our new Degree and Betweenness Centrality `score` properties, so that we can query using them in a performant way:
+
 ```cypher
 CREATE INDEX index_OperationalPointName_degreeScore IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.degreeScore);
 CREATE INDEX index_OperationalPointName_betweennessScore IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.betweennessScore);
 ```
 
+### Tidy Up
+
 Finally, it's best practice to remove your graph projections from memory when you're finished with them:
+
 ```cypher
 CALL gds.graph.drop('OperationalPoints')
 ```
