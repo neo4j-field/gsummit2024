@@ -358,6 +358,8 @@ MATCH path = shortestPath ( (brussels)-[:SECTION*]-(berlin) )
 RETURN path
 ```
 
+This may not be suitable though, as we've not taken into account distance, nor speed - to do that, we should look at Graph Data Science...
+
 ---
 
 ## Graph Data Science (GDS)
