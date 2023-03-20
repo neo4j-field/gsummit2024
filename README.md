@@ -142,15 +142,15 @@ We used something called `DETACH DELETE` here - the reason for this is that Neo4
 
 So far we have only looked at how to query the Nodes, so let's run a query to find some `OperationalPoint`s _and_ the Relationships that connect them.
 
-The first query uses `--` to signify the relationship, and that means a couple of things:
-* It is undirected - we don't mind which way the relationship goes
-* It can be _any_ type - if we had Relationship types _other_ than `SECTION` between `OperationalPoint`s in our Graph we would return those as well
-
 ```cypher
 MATCH path=(:OperationalPoint)--(:OperationalPoint) 
 RETURN path 
 LIMIT 100;
 ```
+
+This query uses `--` to signify the relationship, and that means a couple of things:
+* It is undirected - we don't mind which way the relationship goes
+* It can be _any_ type - if we had Relationship types _other_ than `SECTION` between `OperationalPoint`s in our Graph we would return those as well
 
 In order to make our query future proof, and more performant, we should add the type of the Relationship, and the Direction - `-[:SECTION]->` this helps in both senses as:
 * The Type means that if in the future someone _does_ add a new relationship type, our query _still_ returns what we expect it to
@@ -265,7 +265,7 @@ LIMIT 1
 
 We get no results, as there is no way in our current data set to get from the UK to France or indeed Denmark to Germany.
 
-This is a good example of knowing your Domain, and investigating your dataset for problems from the context of your knowledge. For example, a domain expert might know you _can_ get a train from Stockholm to Berlin, but querying it gets no results:
+This is a good example of **'Knowing your Domain'**, and investigating your dataset for problems from the context of your knowledge. For example, a domain expert might know you _can_ get a train from Stockholm to Berlin, but querying it gets no results:
 
 ```cypher
 MATCH 
