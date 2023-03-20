@@ -426,10 +426,15 @@ RETURN nodes, componentId
 ORDER BY size(nodes) ASC LIMIT 50;
 ```
 
-We can write the Weakly Connected Components community identifiers back to the database so we can query and visualise them later:
+We can also write the Weakly Connected Components community identifiers back to the database so we can query and visualise them later:
 
 ```cypher
 CALL gds.wcc.write('OperationalPoints', {writeProperty: 'componentId'});
+```
+
+We should index our new Weakly Connected Components id property, so that we can query with it in a performant way:
+```cypher
+CREATE INDEX index_OperationalPointName_componentid IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.componentId);
 ```
 
 Matching a specific OperationalPoint and reviewing the other members of its community. You should see that it belongs to an isolated group of OperationalPoints.
@@ -451,7 +456,7 @@ RETURN gds.util.asNode(nodeId).id AS id, score
 ORDER BY score DESC LIMIT 50;
 ```
 
-We can write the Degree Centrality scores back to the database so we can query and visualise them later:
+We should write the Degree Centrality scores back to the database so we can query and visualise them later:
 
 ```cypher
 CALL gds.degree.write('OperationalPoints', {writeProperty: 'degreeScore'})
@@ -467,8 +472,19 @@ RETURN gds.util.asNode(nodeId).id AS id, score
 ORDER BY score DESC LIMIT 50;
 ```
 
-We can write the Betweenness Centrality scores back to the database so we can query and visualise them later:
+We should also write the Betweenness Centrality scores back to the database so we can query and visualise them later:
 
 ```cypher
-CALL gds.betweenness.write('OperationalPoints', {writeProperty: 'betweenessScore'})
+CALL gds.betweenness.write('OperationalPoints', {writeProperty: 'betweennessScore'})
+```
+
+Let's also index our new Degree and Betweenness Centrality score properties, so that we can query using them in a performant way:
+```cypher
+CREATE INDEX index_OperationalPointName_degreeScore IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.degreeScore);
+CREATE INDEX index_OperationalPointName_betweennessScore IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.betweennessScore);
+```
+
+Finally, it's best practice to remove your graph projections from memory when you're finished with them:
+```cypher
+CALL gds.graph.drop('OperationalPoints')
 ```
