@@ -310,7 +310,7 @@ The 'Sweden to Berlin' problem is more complicated, as, the gap occurs in Denmar
 ```cypher
 MATCH 
     (:OperationalPointName {name: 'Nyborg'})<-[:NAMED]-(nyborg:OperationalPoint),
-    (:OperationalPointName {name: 'Hjulby'})<-[:NAMED]-(hjulby:OperationalPoint)-[:NAMED]->
+    (:OperationalPointName {name: 'Hjulby'})<-[:NAMED]-(hjulby:OperationalPoint)
 MERGE (nyborg)-[:SECTION {sectionlength: point.distance(nyborg.geolocation, hjulby.geolocation)/1000.0, curated: true}]->(hjulby);
 ```
 
@@ -358,25 +358,7 @@ MATCH path = shortestPath ( (brussels)-[:SECTION*]-(berlin) )
 RETURN path
 ```
 
-For this use case, we would be better off using the `sectionlength` properties of the `SECTION` relationships to get the shortest path that a Train would need to travel.
-
-```cypher
-// APOC Dijkstra shortest path with weight sectionlength
-MATCH 
-    (:OperationalPointName {name:'Bruxelles-Midi | Brussel-Zuid'})<-[:NAMED]-(brussels:OperationalPoint),
-    (:OperationalPointName {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})<-[:NAMED]-(berlin:OperationalPoint)
-WITH brussels, berlin
-CALL apoc.algo.dijkstra(brussels, berlin, 'SECTION', 'sectionlength') YIELD path, weight
-RETURN path, weight;
-```
-
-NB. This doesn't mean it's the fastest route, as we've not taken into account the speed of the `SECTION` relationship - and it might be the case that the `SECTION` whilst short, is in fact slow.
-
 ---
-
-# *********************** NOTE TO JOE ***************
-# GDS!!!
-# *********************** NOTE TO JOE ***************
 
 ## Graph Data Science (GDS)
 
@@ -398,45 +380,82 @@ CALL gds.graph.project(
     'OperationalPoint',
     {SECTION: {orientation: 'UNDIRECTED'}},
     {
-        relationshipProperties: 'sectionlength'
+        relationshipProperties: 'sectionlength',
+        relationshipProperties: 'traveltime'
     }
 );
 ```
 
 We can calculate the shortest path using GDS Dijkstra:
 
+# *********************** NOTE TO JOE ***************
+# RETURNING ODD RESULTS LIKELY BECAUSE OF MISSING SECTION RELATIONSHIP PROPERTIES
+
 ```cypher
-MATCH (source:OperationalPoint WHERE source.id = 'BEFBMZ'), (target:OperationalPoint WHERE target.id = 'DE000BL')
+MATCH     
+    (:OperationalPointName {name:'Bruxelles-Midi | Brussel-Zuid'})<-[:NAMED]-(brussels:OperationalPoint),
+    (:OperationalPointName {name:'KGX London Kings Cross'})<-[:NAMED]-(london:OperationalPoint)
 CALL gds.shortestPath.dijkstra.stream('OperationalPoints', {
-    sourceNode: source,
-    targetNode: target,
-    relationshipWeightProperty: 'sectionlength'
+    sourceNode: brussels,
+    targetNode: london,
+    relationshipWeightProperty: 'traveltime'
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN *;
 ```
 
-Now we use the Weakly Connected Components Algo to identify those nodes that are not well connected to the network:
+Now we use the Weakly Connected Components Algo in 'stream' mode to review OperationalPoints that are not well connected to the network:
 
 ```cypher
 CALL gds.wcc.stream('OperationalPoints') YIELD nodeId, componentId
 WITH collect(gds.util.asNode(nodeId).id) AS nodes, componentId
 RETURN nodes, componentId 
-ORDER BY size(nodes) ASC;
+ORDER BY size(nodes) ASC LIMIT 50;
 ```
 
-Matching a specific OperationalPoint  from the list above --> use the Neo4j browser output to check the network it is belonging to (see the README file for more information). You will figure out, that it is an isolated network of OperationalPoint s / stations / etc.:
+We can write the Weakly Connected Components community identifiers back to the database so we can query and visualise them later:
+
 ```cypher
-MATCH (op:OperationalPoint) WHERE op.id='BEFBMZ' RETURN op;
+CALL gds.wcc.write('OperationalPoints', {writeProperty: 'componentId'});
 ```
 
-Use the betweenness centrality algo, to find out hot spots in terms of
-sections running through a specific OperationalPoint .
+Matching a specific OperationalPoint and reviewing the other members of its community. You should see that it belongs to an isolated group of OperationalPoints.
+
+```cypher
+MATCH (op:OperationalPoint {id: 'UKN4288'})
+WITH op.componentId as component
+MATCH path = (:OperationalPoint {componentId: component})-[:SECTION]->()
+RETURN path
+```
+
+Using the Degree Centrality algorithm we can identify important nodes in the graph based on how many Section relationships they have.
+Nodes with a high Degree Centrality score represent OperatoinalPoints which are important transfer points in our network.
+
+```cypher
+CALL gds.degree.stream('OperationalPoints')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).id AS id, score
+ORDER BY score DESC LIMIT 50;
+```
+
+We can write the Degree Centrality scores back to the database so we can query and visualise them later:
+
+```cypher
+CALL gds.degree.write('OperationalPoints', {writeProperty: 'degreeScore'})
+```
+
+Using the Betweenness Centrality algorithm we can identify important nodes in the graph by another metric - those nodes which sit on the shortest path between the most other nodes.
+These nodes represent OperationalPoints which many journeys are likely to pass through, and may act as 'bridge' nodes between different parts of the network.
+
 ```cypher
 CALL gds.betweenness.stream('OperationalPoints')
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).id AS id, score
-ORDER BY score DESC;
+ORDER BY score DESC LIMIT 50;
 ```
 
+We can write the Betweenness Centrality scores back to the database so we can query and visualise them later:
 
+```cypher
+CALL gds.betweenness.write('OperationalPoints', {writeProperty: 'betweenessScore'})
+```
