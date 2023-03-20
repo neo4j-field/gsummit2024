@@ -78,7 +78,7 @@ The following high level steps are required, to build the demo environment:
 
 2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
 
-3. After the script has finished loading, you can check your data model. Run the command `CALL db.schema.virtualization` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
+3. After the script has finished loading, you can check your data model. Run the command `CALL db.schema.visualization` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
 
 <img width="800" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/791e76740b212686b73230a1cdca851b643bfbe1/images/data-model-all_labels.png">
 
