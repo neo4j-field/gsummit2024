@@ -277,7 +277,7 @@ RETURN p
 LIMIT 1
 ```
 
-In this query we take advantage of the fact that we have `BorderPoint`s and our Node's have their Country as a label to find all the `BorderPoint`s in Germany, then all the `OperationalPoint`s in Denmark and find the two that are closest together.
+In this query we take advantage of the fact that we have `BorderPoint`s and our Nodes have their Country as a label to find all the `BorderPoint`s in Germany, then all the `OperationalPoint`s in Denmark and find the two that are closest together.
 
 This query doesn't _necessarily_ generate the _right_ border crossing, but for the purposes of this workshop it is adequate. This is a point where Domain Knowledge would come in to play.
 
@@ -351,10 +351,10 @@ This query will find the shortest number of hops between `OperationalPoint`s, ir
 ```cypher
 // Cypher shortest path
 MATCH 
-    (:OperationalPointName {name:'Bruxelles-Midi | Brussel-Zuid'})<-[:NAMED]-(brussels:OperationalPoint),
-    (:OperationalPointName {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})<-[:NAMED]-(berlin:OperationalPoint)
-WITH brussels, berlin
-MATCH path = shortestPath ( (brussels)-[:SECTION*]-(berlin) )
+    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
+    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint)
+WITH stockholm, malmo
+MATCH path = shortestPath ( (malmo)-[:SECTION*]-(stockholm) )
 RETURN path
 ```
 
@@ -374,7 +374,7 @@ CALL gds.graph.drop(toDrop) YIELD graphName
 RETURN "Dropped " + graphName;
 ```
 
-We will project a graph named 'OperationalPoints' into the Graph Catalog. We will take the `OperationalPoint` Node and the `SECTION` Relationship to form a monopartite graph:
+We will project a graph named 'OperationalPoints' into the Graph Catalog. We will take the `OperationalPoint` Nodes and the `SECTION` Relationships to form a monopartite graph:
 
 ```cypher
 CALL gds.graph.project(
@@ -430,19 +430,19 @@ RETURN nodes, componentId
 ORDER BY size(nodes) ASC LIMIT 50;
 ```
 
-We can also write the Weakly Connected Components community identifiers back to the database so we can query and visualise them later:
+We can also write the Weakly Connected Components `componentId` properties to the database so we can query and visualise them later:
 
 ```cypher
 CALL gds.wcc.write('OperationalPoints', {writeProperty: 'componentId'});
 ```
 
-We should index our new Weakly Connected Components `id` property, so that we can query with it in a performant way:
+We should index our new Weakly Connected Components `componentId` property, so that we can query with it in a performant way:
 
 ```cypher
 CREATE INDEX index_OperationalPointName_componentid IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.componentId);
 ```
 
-Matching a specific `OperationalPoint` and reviewing the other members of its community. You should see that it belongs to an isolated group of `OperationalPoint`s.
+Let's find a specific `OperationalPoint` and view the other members of its community. You should see that it belongs to an isolated group of `OperationalPoint`s.
 
 ```cypher
 MATCH (op:OperationalPoint {id: 'UKN4288'})
@@ -463,7 +463,7 @@ RETURN gds.util.asNode(nodeId).id AS id, score
 ORDER BY score DESC LIMIT 50;
 ```
 
-We should write the Degree Centrality scores back to the database so we can query and visualise them later:
+We should write the Degree Centrality `degreeScore` properties to the database so we can query and visualise them later:
 
 ```cypher
 CALL gds.degree.write('OperationalPoints', {writeProperty: 'degreeScore'})
@@ -486,7 +486,7 @@ We should also write the Betweenness Centrality scores back to the database so w
 CALL gds.betweenness.write('OperationalPoints', {writeProperty: 'betweennessScore'})
 ```
 
-Let's also index our new Degree and Betweenness Centrality `score` properties, so that we can query using them in a performant way:
+Let's also index our new Degree Centrality `degreeScore`and Betweenness Centrality `betweennessScore` properties, so that we can query using them in a performant way:
 
 ```cypher
 CREATE INDEX index_OperationalPointName_degreeScore IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.degreeScore);
