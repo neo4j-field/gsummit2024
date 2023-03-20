@@ -380,25 +380,36 @@ CALL gds.graph.project(
     'OperationalPoint',
     {SECTION: {orientation: 'UNDIRECTED'}},
     {
-        relationshipProperties: 'sectionlength',
-        relationshipProperties: 'traveltime'
+        relationshipProperties: ['sectionlength', 'traveltime']
     }
 );
 ```
 
-We can calculate the shortest path using GDS Dijkstra:
-
-# *********************** NOTE TO JOE ***************
-# RETURNING ODD RESULTS LIKELY BECAUSE OF MISSING SECTION RELATIONSHIP PROPERTIES
+We can calculate the shortest path between two stations - for example, Malmö Central to Stockholm Central - using our 'traveltime' relatonship weights and the Dijkstra Source-Target Shortest Path algorithm from the GDS library.  Note that bad data in our dataset (such as null or zero relationship weights) can cause strange results when calculating weighted shortest paths.
 
 ```cypher
 MATCH     
-    (:OperationalPointName {name:'Bruxelles-Midi | Brussel-Zuid'})<-[:NAMED]-(brussels:OperationalPoint),
-    (:OperationalPointName {name:'KGX London Kings Cross'})<-[:NAMED]-(london:OperationalPoint)
+    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
+    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint)
 CALL gds.shortestPath.dijkstra.stream('OperationalPoints', {
-    sourceNode: brussels,
-    targetNode: london,
+    sourceNode: malmo,
+    targetNode: stockholm,
     relationshipWeightProperty: 'traveltime'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+RETURN *;
+```
+
+Do we get the same result if we use the 'sectionlength' relationship property as our weight instead of 'traveltime' when computing the shortest path?
+
+```cypher
+MATCH     
+    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
+    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint)
+CALL gds.shortestPath.dijkstra.stream('OperationalPoints', {
+    sourceNode: malmo,
+    targetNode: stockholm,
+    relationshipWeightProperty: 'sectionlength'
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN *;
