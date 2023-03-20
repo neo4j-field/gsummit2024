@@ -387,7 +387,7 @@ CALL gds.graph.project(
 );
 ```
 
-We can calculate the shortest path between two stations - for example, Malmö Central to Stockholm Central - using our 'traveltime' relatonship weights and the Dijkstra Source-Target Shortest Path algorithm from the GDS library.  Note that bad data in our dataset (such as null or zero relationship weights) can cause strange results when calculating weighted shortest paths.
+We can calculate the shortest path between two stations - for example, Malmö Central to Stockholm Central - using our `traveltime` relatonship weights and the [Dijkstra Source-Target Shortest Path](https://neo4j.com/docs/graph-data-science/current/algorithms/dijkstra-source-target/) algorithm from the GDS library.  Note that bad data in our dataset (such as `null` or `zero` relationship weights) can cause strange results when calculating weighted shortest paths.
 
 ```cypher
 MATCH     
@@ -402,7 +402,7 @@ YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN *;
 ```
 
-Do we get the same result if we use the 'sectionlength' relationship property as our weight instead of 'traveltime' when computing the shortest path?
+Do we get the same result if we use the `sectionlength` relationship property as our weight instead of `traveltime` when computing the shortest path?
 
 ```cypher
 MATCH     
@@ -417,7 +417,7 @@ YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN *;
 ```
 
-Now we use the Weakly Connected Components Algo in 'stream' mode to review OperationalPoints that are not well connected to the network:
+Now we use the [Weakly Connected Components](https://neo4j.com/docs/graph-data-science/current/algorithms/wcc/) algorithm in 'stream' mode to review `OperationalPoint`s that are _not_ well connected to the network:
 
 ```cypher
 CALL gds.wcc.stream('OperationalPoints') YIELD nodeId, componentId
@@ -438,6 +438,7 @@ CREATE INDEX index_OperationalPointName_componentid IF NOT EXISTS FOR (opn:Opera
 ```
 
 Matching a specific OperationalPoint and reviewing the other members of its community. You should see that it belongs to an isolated group of OperationalPoints.
+Matching a specific `OperationalPoint` and reviewing the other members of its community. You should see that it belongs to an isolated group of `OperationalPoint`s.
 
 ```cypher
 MATCH (op:OperationalPoint {id: 'UKN4288'})
@@ -446,8 +447,8 @@ MATCH path = (:OperationalPoint {componentId: component})-[:SECTION]->()
 RETURN path
 ```
 
-Using the Degree Centrality algorithm we can identify important nodes in the graph based on how many Section relationships they have.
-Nodes with a high Degree Centrality score represent OperatoinalPoints which are important transfer points in our network.
+Using the [Degree Centrality](https://neo4j.com/docs/graph-data-science/current/algorithms/degree-centrality/) algorithm we can identify important nodes in the graph based on how many `SECTION` relationships they have.
+Nodes with a high Degree Centrality score represent `OperationalPoint`s which are important transfer points in our network.
 
 ```cypher
 CALL gds.degree.stream('OperationalPoints')
@@ -462,8 +463,9 @@ We should write the Degree Centrality scores back to the database so we can quer
 CALL gds.degree.write('OperationalPoints', {writeProperty: 'degreeScore'})
 ```
 
-Using the Betweenness Centrality algorithm we can identify important nodes in the graph by another metric - those nodes which sit on the shortest path between the most other nodes.
-These nodes represent OperationalPoints which many journeys are likely to pass through, and may act as 'bridge' nodes between different parts of the network.
+Using the [Betweenness Centrality](https://neo4j.com/docs/graph-data-science/current/algorithms/betweenness-centrality/) algorithm we can identify important nodes in the graph by another metric - those nodes which sit on the shortest path between the most other nodes.
+
+These nodes represent `OperationalPoint`s which many journeys are likely to pass through, and may act as 'bridge' nodes between different parts of the network.
 
 ```cypher
 CALL gds.betweenness.stream('OperationalPoints')
