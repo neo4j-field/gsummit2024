@@ -99,7 +99,7 @@ The model shows that we have an `OperationalPoint` Node that is connected to its
 
 All the queries are intended to be run in the Neo4j Browser query window. Please Copy & Paste them to execute them.
 
-You might find the [Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-sheet/current/) useful when following along, especially if you want to write your own queries, but it is not necessary for following along below.
+You might find the [Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-sheet/current/) useful, especially if you want to write your own queries, but it is not necessary for following the queries below.
 
 ---
 ## Simple Queries
