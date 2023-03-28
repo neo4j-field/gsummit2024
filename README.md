@@ -78,13 +78,9 @@ The following high level steps are required, to build the demo environment:
 
 2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
 
-3. After the script has finished loading, you can check your data model. Run the command `CALL db.schema.visualization` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
+3. After the script has finished loading, you can check your data model. Run the command `CALL apoc.meta.subGraph({labels:['OperationalPoint', 'OperationalPointName', 'POI']})` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
 
-<img width="800" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/791e76740b212686b73230a1cdca851b643bfbe1/images/data-model-all_labels.png">
-
-If you hid all the labels with the exception of `OperationalPoint`, `OperationalPointName` and `POI`, you would see a simpler model similar to this:
-
-<img width="540" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/68b41bce4c3ecdd8c73da58f55b7c34790907f4d/images/data-model-with-poi.png">
+<img width="800" alt="Data Model - Digital Twin" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/Model.svg">
 
 The model shows that we have an `OperationalPoint` Node that is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network .
 
@@ -133,7 +129,7 @@ RETURN COUNT(op);
 We don't want that kind of data in our Graph as it could cause problems when we want to do things like Community Detection, and keeping our data as clean as possible is a goal we should have.
 
 ```cypher
-MATCH (op:OperationalPoint)-[NAMED]->(opn:OperationalPointName)
+MATCH (op:OperationalPoint)-[:NAMED]->(opn:OperationalPointName)
 WHERE NOT EXISTS ( (op)-[:SECTION]-() )
 DETACH DELETE op, opn
 ```
@@ -318,7 +314,7 @@ MERGE (nyborg)-[:SECTION {sectionlength: point.distance(nyborg.geolocation, hjul
 
 At the moment, we store the `sectionlength` (in KM) and `speed` (in KPH) properties on the `SECTION` relationship, we can use these together to work out the _best_ time we could take to cross this section on the fly:
 
-```
+```cypher
 MATCH (o1:OperationalPointName)<-[:NAMED]-(s1:Station)-[s:SECTION]->(s2:Station)-[:NAMED]->(o2:OperationalPointName)
 WHERE 
     NOT (s.speed IS NULL) 
