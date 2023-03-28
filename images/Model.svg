@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 <!-- Creator: CorelDRAW -->
-<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="95.1406mm" height="72.0742mm" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="95.1406mm" height="72.0742mm" version="1.0" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
 viewBox="0 0 9514.06 7207.42"
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
@@ -65,37 +65,25 @@ viewBox="0 0 9514.06 7207.42"
   <g transform="matrix(0.99998 0.00625071 -0.00625071 0.99998 825.639 -1401.96)">
    <text x="4374.83" y="3603.71"  class="fil2 fnt0">NAMED</text>
   </g>
-  <g id="_2560319385392" text-anchor="middle" pointer-events="none">
-   <path class="fil0" d="M1873.86 1819.75l-1006.18 -328.12c-48.11,-15.67 -94.21,-37.73 -136.67,-65.36 -268.6,-174.84 -344.63,-534.45 -169.79,-803.05 174.84,-268.59 534.44,-344.63 803.04,-169.79 42.46,27.64 81.29,60.86 115.11,98.52l583.52 649.48 -78.73 70.74 192.67 75.88 -54.9 -199.66 -78.72 70.73 -583.54 -649.49c-32.26,-35.93 -69.32,-67.64 -109.84,-94.02 -256.36,-166.87 -599.57,-94.3 -766.44,162.05 -166.86,256.35 -94.3,599.56 162.06,766.43 40.52,26.38 84.52,47.43 130.45,62.4l1006.17 328.11 -8.21 25.15z"/>
-   <g transform="matrix(0.545538 -0.838086 0.838086 0.545538 -5120.67 2600.76)">
-    <text x="4286.61" y="3603.71"  class="fil2 fnt0">SECTION</text>
-   </g>
+  <path class="fil0" d="M1873.86 1819.75l-1006.18 -328.12c-48.11,-15.67 -94.21,-37.73 -136.67,-65.36 -268.6,-174.84 -344.63,-534.45 -169.79,-803.05 174.84,-268.59 534.44,-344.63 803.04,-169.79 42.46,27.64 81.29,60.86 115.11,98.52l583.52 649.48 -78.73 70.74 192.67 75.88 -54.9 -199.66 -78.72 70.73 -583.54 -649.49c-32.26,-35.93 -69.32,-67.64 -109.84,-94.02 -256.36,-166.87 -599.57,-94.3 -766.44,162.05 -166.86,256.35 -94.3,599.56 162.06,766.43 40.52,26.38 84.52,47.43 130.45,62.4l1006.17 328.11 -8.21 25.15z"/>
+  <g transform="matrix(0.545538 -0.838086 0.838086 0.545538 -5120.67 2600.76)">
+   <text x="4286.61" y="3603.71"  class="fil2 fnt0">SECTION</text>
   </g>
-  <g id="_2560319377424" text-anchor="middle" pointer-events="none">
-   <path class="fil0" d="M3306.52 3105.79l206.65 459.07 24.13 -10.86 -206.66 -459.07 -24.12 10.86zm643.63 1429.79l206.65 459.07 -72.38 32.58 160.47 130.88 8.42 -206.9 -72.38 32.58 -206.66 -459.07 -24.12 10.86z"/>
-   <g transform="matrix(0.410485 0.911868 -0.911868 0.410485 5004.77 -1739.68)">
-    <text x="4304.13" y="3603.71"  class="fil2 fnt0">IS_NEAR</text>
-   </g>
+  <path class="fil0" d="M3306.52 3105.79l206.65 459.07 24.13 -10.86 -206.66 -459.07 -24.12 10.86zm643.63 1429.79l206.65 459.07 -72.38 32.58 160.47 130.88 8.42 -206.9 -72.38 32.58 -206.66 -459.07 -24.12 10.86z"/>
+  <g transform="matrix(0.410485 0.911868 -0.911868 0.410485 5004.77 -1739.68)">
+   <text x="4304.13" y="3603.71"  class="fil2 fnt0">IS_NEAR</text>
   </g>
-  <g id="_2560319379488" text-anchor="middle" pointer-events="none">
-   <g aria-label="graph-node-2">
-    <circle class="fil3 str0" cx="2884.15" cy="2135.29" r="1058.33"/>
-    <g transform="matrix(1 0 0 1 -1872.88 -1336.11)">
-     <text x="3771.56" y="3603.71"  class="fil4 fnt1">OperationalPoint</text>
-    </g>
-   </g>
-   <g text-anchor="middle" pointer-events="none" aria-label="graph-node-3">
-    <circle class="fil5 str1" cx="8422.15" cy="2169.91" r="1058.33"/>
-    <g transform="matrix(1 0 0 1 3665.12 -1301.5)">
-     <text x="3749.6" y="3603.71"  class="fil4 fnt1">OperationalPoi…</text>
-    </g>
-   </g>
-   <g text-anchor="middle" pointer-events="none" aria-label="graph-node-4">
-    <circle class="fil6 str2" cx="4679.32" cy="6123.16" r="1058.33"/>
-    <g transform="matrix(1 0 0 1 -77.7 2651.74)">
-     <text x="4529.14" y="3603.71"  class="fil4 fnt1">POI</text>
-    </g>
-   </g>
+  <circle class="fil3 str0" cx="2884.15" cy="2135.29" r="1058.33"/>
+  <g transform="matrix(1 0 0 1 -1872.88 -1336.11)">
+   <text x="3771.56" y="3603.71"  class="fil4 fnt1">OperationalPoint</text>
+  </g>
+  <circle class="fil5 str1" cx="8422.15" cy="2169.91" r="1058.33"/>
+  <g transform="matrix(1 0 0 1 3665.12 -1301.5)">
+   <text x="3749.6" y="3603.71"  class="fil4 fnt1">OperationalPoi…</text>
+  </g>
+  <circle class="fil6 str2" cx="4679.32" cy="6123.16" r="1058.33"/>
+  <g transform="matrix(1 0 0 1 -77.7 2651.74)">
+   <text x="4529.14" y="3603.71"  class="fil4 fnt1">POI</text>
   </g>
  </g>
 </svg>
