@@ -199,7 +199,7 @@
         },
         {
           "title": "POIs on your Track",
-          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_1})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_2})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nWITH nodes(path) AS nodeset\nUNWIND nodeset AS nod\nMATCH(nod)-[:HAS_POI]->(p:POI)\nRETURN count(p);",
+          "query": "MATCH (:OperationalPointName {name: $neodash_operationalpointname_name_1})<-[:NAMED]-(op1:OperationalPoint)\nWITH op1.id AS startid\nMATCH (:OperationalPointName {name: $neodash_operationalpointname_name_2})<-[:NAMED]-(op2:OperationalPoint)\nWITH op2.id AS destid, startid\nMATCH (source:OperationalPoint WHERE source.id = startid), (target:OperationalPoint WHERE target.id = destid)\nCALL apoc.algo.dijkstra(source, target, 'SECTION', 'sectionlength') yield path as path\nWITH nodes(path) AS nodeset\nUNWIND nodeset AS nod\nMATCH(nod)-[:IS_NEAR]->(p:POI)\nRETURN count(p);",
           "width": 3,
           "height": 1,
           "x": 9,
