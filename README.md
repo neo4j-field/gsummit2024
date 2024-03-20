@@ -1,6 +1,6 @@
-# Graph Summit 2023 EMEA - Workshop Digital Twin
+# Graph Summit 2024 EMEA - Workshop Digital Twin
 
-This repository contains the material used during the **Graph Summit 2023 - Building a Graph Solution Workshops**. 
+This repository contains the material used during the **Graph Summit 2024 - Building a Graph Solution Workshops**. 
 
 The aim of the workshop is to provide a structured way to build a small Digital Twin Knowledge Graph. It answers questions from a business perspective and discusses how a Digital Twin graph could be extended for more insights and values.
 
@@ -69,18 +69,19 @@ POIs have the following properties:
 
 ## Building the demo environment
 
-The following high level steps are required, to build the demo environment:
+The following high level steps are required, to build the demo environment (there is a [document](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/documents/Preparation%20for%20the%20Workshops.pdf) available as well):
 
 1. Create a Neo4j Graph instance via any of:
-    1. [Neo4j Desktop](https://neo4j.com/download-center/)
-        - If you are using Neo4j Desktop, you will need to ensure that both GDS and APOC are added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
-    2. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
+    1. [Neo4j Aura](https://neo4j.com/cloud/aura-free/)
+    2. [Neo4j Desktop](https://neo4j.com/download-center/)
+        - If you are using Neo4j Desktop, you will need to ensure that APOC is added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
+    3. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
 
-2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
+2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
 
 3. After the script has finished loading, you can check your data model. Run the command `CALL apoc.meta.subGraph({labels:['OperationalPoint', 'OperationalPointName', 'POI']})` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
 
-<img width="800" alt="Data Model - Digital Twin" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/Model.svg">
+<img width="800" alt="Data Model - Digital Twin" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/Model.svg">
 
 The model shows that we have an `OperationalPoint` Node that is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network .
 
@@ -89,7 +90,7 @@ The model shows that we have an `OperationalPoint` Node that is connected to its
 ---
 ## Run some Cypher queries on your Graph 
 
-> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/all_queries.cypher) file. 
+> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/cypher/all_queries.cypher) file. 
 >
 > For the workshop we will be running through the contents of this readme.
 
@@ -336,7 +337,7 @@ WHERE
 SET r.traveltime = (r.sectionlength / r.speed) * 60 * 60
 ```
 
-> **IMPORTANT** To be able to use the [NeoDash dashboard](https://raw.githubusercontent.com/cskardon/gsummit2023/main/dashboards/digital-twin_dashboard.json) in this repository fully, you will need to execute this query.
+> **IMPORTANT** To be able to use the [NeoDash dashboard](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/dashboards/digital-twin_dashboard.json) in this repository fully, you will need to execute this query.
 
 ## Shortest Path Queries using different Shortest Path functions in Neo4j
 
