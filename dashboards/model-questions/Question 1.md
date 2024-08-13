@@ -8,8 +8,8 @@ We've already seen an example between two stations - Malmö and London Paddingto
 
 ```cypher
 MATCH 
-    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint),
-    (:OperationalPointName {name:'PAD London Paddington'})<-[:NAMED]-(paddington:OperationalPoint)
+    (malmo:OperationalPoint {name:'Malmö central'}),
+    (paddington:OperationalPoint {name:'PAD London Paddington'})
 WITH 
     malmo, paddington
 MATCH shortest = shortestPath( (malmo)-[:SECTION*]-(paddington) )
@@ -20,8 +20,8 @@ And using APOC to get the route based on the journey length:
 
 ```cypher
 MATCH 
-    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint),
-    (:OperationalPointName {name:'PAD London Paddington'})<-[:NAMED]-(paddington:OperationalPoint)
+    (malmo:OperationalPoint {name:'Malmö central'}),
+    (paddington:OperationalPoint {name:'PAD London Paddington'})
 WITH 
     malmo, paddington
 CALL apoc.algo.dijkstra(malmo, paddington, 'SECTION', 'sectionlength') YIELD path, weight
@@ -57,9 +57,9 @@ We will want to repeat this for the `endlocation` as well. This allows our users
 Now we have a way for our business users to search for a particular location, we need to use that to find the actual `OperationalPoint` instances to find our route. Cypher wise that's pretty simple:
 
 ```cypher
-MATCH (opn:OperationalPointName)<-[:NAMED]-(op:OperationalPoint)
-WHERE opn.name CONTAINS $neodash_startlocation
-RETURN opn.name AS name, op.id AS __ID
+MATCH (op:OperationalPoint)
+WHERE op.name CONTAINS $neodash_startlocation
+RETURN op.name AS name, op.id AS __ID
 ```
 
 First, let's add that to a 'Table' report connected to our Neo4j database, then we'll go into what we're doing.

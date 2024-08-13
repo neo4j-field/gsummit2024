@@ -33,14 +33,15 @@ CALL apoc.schema.assert({},{});
 CREATE CONSTRAINT uc_OperationalPoint_id IF NOT EXISTS FOR (op:OperationalPoint) REQUIRE (op.id) IS UNIQUE;
 
 //
-// Create index for the Operation Point name
+// Create index for the Operation Point on Name
 //
-CREATE INDEX index_OperationalPointName_name IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.name);
+CREATE INDEX index_OperationalPoint_name IF NOT EXISTS FOR (op:OperationalPoint) ON (op.name);
 
 //
 // Loading Operational Points
 //
-LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/OperationalPoint_All.csv" AS row
+// LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/data/OperationalPoint_All.csv" AS row
+LOAD CSV WITH HEADERS FROM "file:///D:/Projects/Github/neo4j-field/gsummit2024/data/OperationalPoint_All.csv" AS row
 //This WITH is to ensure our data is as normalized as we can
 WITH
     trim(row.id) AS id, //trim will remove and start and trailing spaces from an ID
@@ -50,16 +51,17 @@ WITH
     [] + trim(row.country) + trim(row.extralabel) AS labels,
     trim(row.country) AS country
 MERGE (op:OperationalPoint {id: id})
-SET
-    op.geolocation = Point({latitude: latitude, longitude: longitude})
+ON CREATE SET
+    op.geolocation = Point({latitude: latitude, longitude: longitude}),
+    op.name = name
 WITH op, labels, name, country
 CALL apoc.create.addLabels( op, labels ) YIELD node
-CREATE (node)-[:NAMED {country: country}]->(:OperationalPointName {name: name});
+RETURN DISTINCT 'Complete';
 
 //
 // Load Section Length Data
 //
-LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/SECTION_ALL_Length.csv" AS row
+LOAD CSV WITH HEADERS FROM "file:///D:/Projects/Github/neo4j-field/gsummit2024/data/SECTION_ALL_Length.csv" AS row
 WITH
     trim(row.source) AS sourceId,
     trim(row.target) AS targetId,
@@ -72,7 +74,7 @@ SET s.sectionlength = length;
 //
 // Load Speed Data
 //
-LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/SECTION_ALL_Speed.csv" AS row
+LOAD CSV WITH HEADERS FROM "file:///D:/Projects/Github/neo4j-field/gsummit2024/data/SECTION_ALL_Speed.csv" AS row
 WITH
     trim(row.source) AS sourceId,
     trim(row.target) AS targetId,
@@ -85,7 +87,7 @@ SET s.speed = speed;
 //
 // Load Point of Interest data
 //
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/cskardon/gsummit2023/main/data/POIs.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///D:/Projects/Github/neo4j-field/gsummit2024/data/POIs.csv' AS row
 WITH 
     row.CITY AS city,
     row.POI_DESCRIPTION AS description,
