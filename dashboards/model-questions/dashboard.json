@@ -2,7 +2,7 @@
   "title": "The questions",
   "version": "2.4",
   "settings": {
-    "pagenumber": 1,
+    "pagenumber": 3,
     "editable": true,
     "fullscreenEnabled": false,
     "parameters": {
@@ -16,7 +16,10 @@
       "neodash_q2AvoidId": "UKN3440",
       "neodash_q2_avoid_name": "Willes",
       "neodash_q2StartId": "UKN2431",
-      "neodash_q2EndId": "UKN2048"
+      "neodash_q2EndId": "UKN2048",
+      "neodash_poi_photo": "https://en.wikipedia.org/wiki/London_Eye#/media/File:Ojo_de_Londres,_Londres,_Inglaterra,_2014-08-11,_DD_203.JPG",
+      "neodash_poi_website": "https://en.wikipedia.org/wiki/London_Eye",
+      "neodash_poi_distance": "5000"
     },
     "theme": "light"
   },
@@ -61,7 +64,7 @@
         {
           "id": "1585d9fc-fd2b-45dc-9984-7410d0bf7341",
           "title": "Select the Start",
-          "query": "MATCH (opn:OperationalPointName)<-[:NAMED]-(op:OperationalPoint)\nWHERE opn.name CONTAINS $neodash_startlocation\nRETURN opn.name AS name, op.id AS __ID",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_startlocation\nRETURN op.name AS name, op.id AS __ID",
           "width": 6,
           "height": 3,
           "x": 0,
@@ -83,7 +86,7 @@
         {
           "id": "f550fd89-a2a1-43b3-8e1e-f2302f5c5c18",
           "title": "Select the End",
-          "query": "MATCH (opn:OperationalPointName)<-[:NAMED]-(op:OperationalPoint)\nWHERE opn.name CONTAINS $neodash_endlocation\nRETURN opn.name AS name, op.id AS __ID",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_endlocation\nRETURN op.name AS name, op.id AS __ID",
           "width": 6,
           "height": 3,
           "x": 6,
@@ -124,58 +127,44 @@
           "schema": [
             [
               "OperationalPoint",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "Station",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "UK",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "SmallStation",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "TrainTechnicalServices",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "Junction",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "DepotOrWorkshop",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ]
           ]
@@ -202,58 +191,44 @@
           "schema": [
             [
               "OperationalPoint",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "Station",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "UK",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "SmallStation",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "TrainTechnicalServices",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "Junction",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ],
             [
               "DepotOrWorkshop",
-              "componentId",
-              "degreeScore",
+              "name",
               "id",
-              "betweennessScore",
               "geolocation"
             ]
           ]
@@ -300,7 +275,7 @@
         {
           "id": "a5dfa355-eb19-4e0a-a75d-756c7c9ee36f",
           "title": "",
-          "query": "MATCH (opn:OperationalPointName)<-[:NAMED]-(op:OperationalPoint)\nWHERE opn.name CONTAINS $neodash_q2_start_name\nRETURN opn.name AS name, op.id AS __ID\n\n\n",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_q2_start_name\nRETURN op.name AS name, op.id AS __ID",
           "width": 4,
           "height": 4,
           "x": 0,
@@ -322,7 +297,7 @@
         {
           "id": "9cdf7deb-fe83-4af6-bab9-5f7f4a011016",
           "title": "",
-          "query": "MATCH (opn:OperationalPointName)<-[:NAMED]-(op:OperationalPoint)\nWHERE opn.name CONTAINS $neodash_q2_end_name\nRETURN opn.name AS name, op.id AS __ID\n\n\n",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_q2_end_name\nRETURN op.name AS name, op.id AS __ID\n\n\n\n\n\n",
           "width": 4,
           "height": 4,
           "x": 4,
@@ -361,7 +336,7 @@
         {
           "id": "c437c9de-d36b-4266-aa86-92b64052f614",
           "title": "",
-          "query": "MATCH (opn:OperationalPointName)<-[:NAMED]-(op:OperationalPoint)\nWHERE opn.name CONTAINS $neodash_q2_avoid_name\nRETURN opn.name AS name, op.id AS __ID\n\n\n",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_q2_avoid_name\nRETURN op.name AS name, op.id AS __ID\n",
           "width": 4,
           "height": 4,
           "x": 8,
@@ -401,49 +376,37 @@
           "schema": [
             [
               "OperationalPoint",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "PassengerTerminal",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "UK",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "TrainTechnicalServices",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "Junction",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "SmallStation",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ]
@@ -469,41 +432,31 @@
           "schema": [
             [
               "OperationalPoint",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "PassengerTerminal",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "UK",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "TrainTechnicalServices",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "SmallStation",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ]
@@ -530,49 +483,37 @@
           "schema": [
             [
               "OperationalPoint",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "PassengerTerminal",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "UK",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "TrainTechnicalServices",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "Junction",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "SmallStation",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ]
@@ -598,41 +539,31 @@
           "schema": [
             [
               "OperationalPoint",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "PassengerTerminal",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "UK",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "TrainTechnicalServices",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ],
             [
               "SmallStation",
-              "componentId",
-              "betweennessScore",
-              "degreeScore",
+              "name",
               "id",
               "geolocation"
             ]
@@ -641,7 +572,7 @@
         {
           "id": "2df18b0c-9b65-4ab6-9253-ce18d8e7dadc",
           "title": "Operational Points on the way",
-          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_q2StartId}),(end:OperationalPoint {id:$neodash_q2EndId})\nMATCH path =\n    (start)\n    ( (:OperationalPoint)-[:SECTION]-(op:OperationalPoint) ){1,10}\n    (end)\nUNWIND nodes(path) AS p\nWITH p WHERE p <> start AND p <> end\nMATCH (p)-[:NAMED]->(pName:OperationalPointName)\nRETURN DISTINCT pName.name AS name, p.id AS __ID\n\n\n",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_q2StartId}),(end:OperationalPoint {id:$neodash_q2EndId})\nMATCH path =\n    (start)\n    ( (:OperationalPoint)-[:SECTION]-(op:OperationalPoint) ){1,10}\n    (end)\nUNWIND nodes(path) AS p\nWITH p WHERE p <> start AND p <> end\nRETURN DISTINCT p.name AS name, p.id AS __ID\n\n\n",
           "width": 6,
           "height": 4,
           "x": 0,
@@ -659,6 +590,102 @@
               }
             ]
           }
+        }
+      ]
+    },
+    {
+      "title": "Question 3",
+      "reports": [
+        {
+          "id": "44125525-11b8-4afa-afb3-5aff584f4ffe",
+          "title": "Information on Question 3",
+          "query": "Please see the up to date original [here](https://github.com/neo4j-field/gsummit2024/blob/main/dashboards/model-questions/Question%203.md)\n\n# How many routes are affected if I need to upgrade an Operational Point?\n\n> A Switch needs to be upgraded to support the network\n\n## Introduction\n\nIn the [previous question](Question%202.md) we could see that there were situations where we could route around problems, but this isn't always the case. \n\nIn order to know what _Routes_ are affected by an `OperationalPoint` being worked on, we would need to define the concept of a route with reference to the network. \n\nWe don't actually model Routes, what we're modeling is the network itself. Just because you _can_ get from Paddington to Stockholm in a physical sense, it doesn't mean that is a route.\n\nRoutes are typically operated by a service provider which could be a private company, or indeed a national government. A _journey_ could take in multiple routes.\n\nTo model routes, what could we do?\n\n## Some Ideas\n\nThese are a _few_ ideas for how you might want to model it (but you don't _have_ to).\n\n### `ROUTE` Relationship\n\nAdd a `ROUTE` relationship to the model.\n\nThere are lots of ways to do this, for example we could:\n\n* Have an identifier to say which routes are using this `ROUTE`? \n* Maybe a relationship per route? So some `OperationalPoint`s would be joined by multiple (in the case of big terminals - a *lot*) route relationships.\n* Model `ROUTE` only between `Station`/`SmallStation` `OperationalPoints`? - Would this work?\n    - If you skip the `Switch` (for example) how would you know it's on the Route? This question would need to be changed to be 'How many routes are affected if I need to upgrade a `Station`.\n\n### Modifying the `SECTION` Relationship\n\n* Maybe just add identifiers to each `SECTION`\n\n## The bigger problem\n\nWhere is the data?\n\n\nThis is the biggest issue - there are lots of ways to model the data, and each has pros/cons - but it's largely moot without the data, and this is a good example of how - you can have the best set of reasonable business questions, but you don't have the data to actually achieve it.\n\n\nIt's why you need to ensure that the questions are defined by _all_ the stakeholders, the Project Owners, Business Owners _and_ the Developers - to know if it _even_ is possible. \n",
+          "width": 24,
+          "height": 7,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        }
+      ]
+    },
+    {
+      "title": "Question 4",
+      "reports": [
+        {
+          "id": "a21ef9cc-bce8-4a4e-8405-4f0b19f28723",
+          "title": "POIs by Distance from Route",
+          "query": "WITH toInteger($neodash_poi_distance) AS radiusInMetres\nMATCH \n    (malmo:OperationalPoint {name:'Malmö central'}),\n    (paddington:OperationalPoint {name:'PAD London Paddington'})\nWITH \n    malmo, paddington, radiusInMetres\nMATCH shortest = shortestPath( (malmo)-[:SECTION*]-(paddington) )\nUNWIND nodes(shortest) AS station \nWITH station, radiusInMetres\nWHERE 'SmallStation' IN labels(station) \n      OR 'Station' IN labels(station) \n      OR 'PassengerTerminal' IN labels(station) \nMATCH (poi:POI)\nWHERE point.distance(poi.geolocation, station.geolocation) < radiusInMetres\nRETURN \n    station.name AS Station,\n    poi.description AS POI,\n    round(point.distance(poi.geolocation, station.geolocation), 2) AS `Distance (m)`,\n    poi.linkFoto AS __poiPhoto,\n    poi.linkWebSite AS __poiWebsite\nORDER BY `Distance (m)`",
+          "width": 9,
+          "height": 4,
+          "x": 4,
+          "y": 0,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "POI",
+                "value": "__poiPhoto",
+                "customization": "set variable",
+                "customizationValue": "poi_photo"
+              },
+              {
+                "condition": "Click",
+                "field": "POI",
+                "value": "__poiWebsite",
+                "customization": "set variable",
+                "customizationValue": "poi_website"
+              }
+            ],
+            "columnWidths": "[1,4,1]"
+          }
+        },
+        {
+          "id": "f976133f-67de-4c4a-b236-fb4b66fe794d",
+          "title": "",
+          "query": "$neodash_poi_photo",
+          "width": 13,
+          "height": 4,
+          "x": 0,
+          "y": 4,
+          "type": "iframe",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "7e470d49-f8b0-46f4-9d02-657e4fe0e2bb",
+          "title": "",
+          "query": "$neodash_poi_website\n\n\n",
+          "width": 11,
+          "height": 8,
+          "x": 13,
+          "y": 0,
+          "type": "iframe",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "cc6580b3-570f-4a09-8a2b-fb6a6c12cc8c",
+          "title": "Distance (m)",
+          "query": "RETURN true;",
+          "width": 4,
+          "height": 4,
+          "x": 0,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Free Text",
+            "entityType": "poi_distance",
+            "parameterName": "neodash_poi_distance"
+          },
+          "schema": []
         }
       ]
     }

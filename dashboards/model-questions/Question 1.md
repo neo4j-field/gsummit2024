@@ -36,17 +36,17 @@ First we need to have a new dashboard, and turn on 'Advanced Visualisations' and
 
 To do that, we need to open the Plugins dialog, by pressing the puzzle 🧩 icon in the top right of the dashboard:
 
-<img alt="Picture showing the Plugin dialog icon, with a red arrow pointing at it" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/dashboard/question1/Question1_PluginButton.png">
+<img alt="Picture showing the Plugin dialog icon, with a red arrow pointing at it" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/dashboard/question1/Question1_PluginButton.png">
 
 On that dialog, we need to select the Advanced Visualisations and Report Actions plugins (as indicated below).
 
-<img alt="Picture showing the Plugin dialog, with a red arrow pointing at the Advanced Visualisations select check box, and another red arrow pointing at the Report Actions select check box." src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/dashboard/question1/Question1_PluginSelect.png">
+<img alt="Picture showing the Plugin dialog, with a red arrow pointing at the Advanced Visualisations select check box, and another red arrow pointing at the Report Actions select check box." src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/dashboard/question1/Question1_PluginSelect.png">
 
 ## Parameter Entry
 
 First we need parameters, we don't want to hardcode the locations in, as our dashboard would have to be re-written for every possible combination. So, we'll first add a **Parameter Select** report. In it we're simply going to set a parameter (`startlocation`) to the value of a free text entry.
 
-<img alt="Picture showing the Parameter select report in NeoDash with Free Text selected" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/dashboard/question1/Question1_ParameterSelect.png">
+<img alt="Picture showing the Parameter select report in NeoDash with Free Text selected" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/dashboard/question1/Question1_ParameterSelect.png">
 
 We will want to repeat this for the `endlocation` as well. This allows our users to just type in any station name.
 
@@ -70,7 +70,7 @@ But what's this convention of using `__` before the `ID`? That means NeoDash won
 
 We can't select which of those we want though - and that's something we would like our business users to do - so... we now 'edit' our report and on the bottom right, you'll see a 'sparkles' icon ✨
 
-<img alt="Picture showing the Sparkles icon on the edit report page" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/dashboard/question1/Question1_ReportSelect.png">
+<img alt="Picture showing the Sparkles icon on the edit report page" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/dashboard/question1/Question1_ReportSelect.png">
 
 Once opened, we want to choose 'Cell select' and type in `name` (or whatever you called your column).
 
@@ -78,7 +78,7 @@ Then we're going to set _another_ parameter - in this case we've called it `star
 
 Finally we choose what we want to set that parameter to, and in this case it's `__ID`.
 
-<img alt="Picture showing the add actions page" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/dashboard/question1/Question1_ReportActions.png">
+<img alt="Picture showing the add actions page" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/dashboard/question1/Question1_ReportActions.png">
 
 If we save and go back to the report, we can see the report now shows the names of the `OperationalPoint`s as buttons that are selectable.
 
@@ -103,7 +103,7 @@ RETURN path, weight;
 
 We're using the parameters we've selected from the options and rendering them to the screen.
 
-<img alt="Picture showing the Graph view" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/dashboard/question1/Question1_GraphView.png">
+<img alt="Picture showing the Graph view" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/dashboard/question1/Question1_GraphView.png">
 
 ## Render the route as a Map
 
@@ -113,4 +113,4 @@ Yes! We turned on the 'Advanced Visualisations' earlier, and that gets us access
 
 Now when this is saved you should see a map output of the results.
 
-<img alt="Picture showing the Map view" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/dashboard/question1/Question1_MapView.png">
+<img alt="Picture showing the Map view" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/dashboard/question1/Question1_MapView.png">

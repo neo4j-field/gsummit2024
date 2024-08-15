@@ -1,5 +1,12 @@
-### NeoDash Example Dashboard for Graph Summit 2023 Digital Twin Workshop
+# NeoDash 
 
-The Dashboard save as JSON export from [NeoDash](https://neo4j.com/labs/neodash/) can imported into NeoDash via the "Load Dashboard" button.
+[NeoDash](https://neo4j.com/labs/neodash/) is an open-source, low-code Dashboard Builder for Neo4j. It lets you build an interactive dashboard with tables, graphs, bar charts, line charts, maps and more.
 
-<img width="800" alt="Data Model - Digital Twin" src="https://github.com/neo4j-field/gsummit2023/blob/eca030c5ec1c1f3b55f5a2380b11a50dad7bcdf7/images/NeoDash-Dashboard_1.png">
+We're going to take our dataset and try to answer our 4 questions from the beginning of the workshop:
+
+* [Question 1](Question%201.md): What is the route from Operational Point X to Operational Point Y?
+* [Question 2](Question%202.md): What is an alternative route if an Operational Point on a route is closed?
+* [Question 3](Question%203.md): How many routes are affected if I need to upgrade an Operational Point?
+* [Question 4](Question%204.md): What POIs are along a route?
+
+The liklihood is that we won't get through them all in this workshop, but they will be there for you to look at later!

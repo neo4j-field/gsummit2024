@@ -1,6 +1,6 @@
 # Graph Data Science (GDS)
 
-This file gives some advice on how to 
+This file gives some advice on how to use GDS with the dataset.
 
 > **NB** to use GDS you will need to be either using Sandbox OR Desktop environments, Aura Free will not allow access.
 

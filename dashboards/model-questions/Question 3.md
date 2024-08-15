@@ -1,4 +1,4 @@
-# How many routes are affected if I need to upgrade an Operational Point?
+# Question 3: How many routes are affected if I need to upgrade an Operational Point?
 
 > A Switch needs to be upgraded to support the network
 
