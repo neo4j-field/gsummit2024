@@ -1,0 +1,708 @@
+{
+  "title": "The questions",
+  "version": "2.4",
+  "settings": {
+    "pagenumber": 3,
+    "editable": true,
+    "fullscreenEnabled": false,
+    "parameters": {
+      "neodash_startlocation": "Exeter",
+      "neodash_endlocation": "Plymou",
+      "neodash_endId": "UKN2775",
+      "neodash_startId": "UKN1818",
+      "neodash_q2_start_name": "PAD",
+      "neodash_q2_end_name": "HDN",
+      "neodash_q2avoidname": "Willes",
+      "neodash_q2AvoidId": "UKN3440",
+      "neodash_q2_avoid_name": "Willes",
+      "neodash_q2StartId": "UKN2431",
+      "neodash_q2EndId": "UKN2048",
+      "neodash_poi_photo": "https://en.wikipedia.org/wiki/London_Eye#/media/File:Ojo_de_Londres,_Londres,_Inglaterra,_2014-08-11,_DD_203.JPG",
+      "neodash_poi_website": "https://en.wikipedia.org/wiki/London_Eye",
+      "neodash_poi_distance": "5000"
+    },
+    "theme": "light"
+  },
+  "pages": [
+    {
+      "title": "Question 1",
+      "reports": [
+        {
+          "id": "780e29c8-a8ec-43ef-8d6a-f8b3c0b7d3cd",
+          "title": "Search for Start",
+          "query": "RETURN true;",
+          "width": 6,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Free Text",
+            "entityType": "StartLocation",
+            "parameterName": "neodash_startlocation"
+          },
+          "schema": []
+        },
+        {
+          "id": "6580b095-c6e3-45c0-8f8f-2c05a442a40d",
+          "title": "Search for End",
+          "query": "RETURN true;",
+          "width": 6,
+          "height": 2,
+          "x": 6,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Free Text",
+            "entityType": "EndLocation",
+            "parameterName": "neodash_endlocation"
+          },
+          "schema": []
+        },
+        {
+          "id": "1585d9fc-fd2b-45dc-9984-7410d0bf7341",
+          "title": "Select the Start",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_startlocation\nRETURN op.name AS name, op.id AS __ID",
+          "width": 6,
+          "height": 3,
+          "x": 0,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "name",
+                "value": "__ID",
+                "customization": "set variable",
+                "customizationValue": "startId"
+              }
+            ]
+          }
+        },
+        {
+          "id": "f550fd89-a2a1-43b3-8e1e-f2302f5c5c18",
+          "title": "Select the End",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_endlocation\nRETURN op.name AS name, op.id AS __ID",
+          "width": 6,
+          "height": 3,
+          "x": 6,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "name",
+                "value": "__ID",
+                "customization": "set variable",
+                "customizationValue": "endId"
+              }
+            ]
+          }
+        },
+        {
+          "id": "7d694bfa-956c-4f13-b8a7-f216422daaff",
+          "title": "Graph View",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_startId}),(end:OperationalPoint {id:$neodash_endId})\nCALL apoc.algo.dijkstra(start, end, 'SECTION', 'sectionlength') YIELD path, weight\nRETURN path, weight;",
+          "width": 12,
+          "height": 4,
+          "x": 0,
+          "y": 5,
+          "type": "graph",
+          "selection": {
+            "OperationalPoint": "id",
+            "Station": "id",
+            "UK": "id",
+            "SmallStation": "id",
+            "TrainTechnicalServices": "id",
+            "Junction": "id",
+            "DepotOrWorkshop": "id"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "OperationalPoint",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "Station",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "UK",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "SmallStation",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "TrainTechnicalServices",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "Junction",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "DepotOrWorkshop",
+              "name",
+              "id",
+              "geolocation"
+            ]
+          ]
+        },
+        {
+          "id": "30125a17-ab89-4a22-a68a-01f066ef2d1f",
+          "title": "Map View",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_startId}),(end:OperationalPoint {id:$neodash_endId})\nCALL apoc.algo.dijkstra(start, end, 'SECTION', 'sectionlength') YIELD path, weight\nRETURN path, weight;\n\n\n\n",
+          "width": 12,
+          "height": 9,
+          "x": 12,
+          "y": 0,
+          "type": "map",
+          "selection": {
+            "OperationalPoint": "id",
+            "Station": "id",
+            "UK": "id",
+            "SmallStation": "id",
+            "TrainTechnicalServices": "id",
+            "Junction": "id",
+            "DepotOrWorkshop": "id"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "OperationalPoint",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "Station",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "UK",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "SmallStation",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "TrainTechnicalServices",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "Junction",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "DepotOrWorkshop",
+              "name",
+              "id",
+              "geolocation"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Question 2",
+      "reports": [
+        {
+          "id": "9ff59c42-6336-4b54-8117-eca1e69a31ff",
+          "title": "",
+          "query": "RETURN true;",
+          "width": 4,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Free Text",
+            "entityType": "Q2 Start Name",
+            "parameterName": "neodash_q2_start_name"
+          },
+          "schema": []
+        },
+        {
+          "id": "880a301c-4004-4747-8548-8b7c3440a74c",
+          "title": "",
+          "query": "RETURN true;",
+          "width": 4,
+          "height": 2,
+          "x": 4,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Free Text",
+            "entityType": "Q2 End Name",
+            "parameterName": "neodash_q2_end_name"
+          },
+          "schema": []
+        },
+        {
+          "id": "a5dfa355-eb19-4e0a-a75d-756c7c9ee36f",
+          "title": "",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_q2_start_name\nRETURN op.name AS name, op.id AS __ID",
+          "width": 4,
+          "height": 4,
+          "x": 0,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "name",
+                "value": "__ID",
+                "customization": "set variable",
+                "customizationValue": "q2StartId"
+              }
+            ]
+          }
+        },
+        {
+          "id": "9cdf7deb-fe83-4af6-bab9-5f7f4a011016",
+          "title": "",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_q2_end_name\nRETURN op.name AS name, op.id AS __ID\n\n\n\n\n\n",
+          "width": 4,
+          "height": 4,
+          "x": 4,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "name",
+                "value": "__ID",
+                "customization": "set variable",
+                "customizationValue": "q2EndId"
+              }
+            ]
+          }
+        },
+        {
+          "id": "1eb5d041-a820-43f1-95d8-c5963cb2a799",
+          "title": "",
+          "query": "RETURN true;",
+          "width": 4,
+          "height": 2,
+          "x": 8,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Free Text",
+            "entityType": "Q2 Avoid Name",
+            "parameterName": "neodash_q2_avoid_name"
+          },
+          "schema": []
+        },
+        {
+          "id": "c437c9de-d36b-4266-aa86-92b64052f614",
+          "title": "",
+          "query": "MATCH (op:OperationalPoint)\nWHERE op.name CONTAINS $neodash_q2_avoid_name\nRETURN op.name AS name, op.id AS __ID\n",
+          "width": 4,
+          "height": 4,
+          "x": 8,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "name",
+                "value": "__ID",
+                "customization": "set variable",
+                "customizationValue": "q2AvoidId"
+              }
+            ]
+          }
+        },
+        {
+          "id": "8ab57aa5-cd4a-4597-8e74-3490614c2cc5",
+          "title": "Avoiding",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_q2StartId}),(end:OperationalPoint {id:$neodash_q2EndId})\nMATCH p =\n    (start)\n    ( (:OperationalPoint)-[:SECTION]-(op:OperationalPoint WHERE NOT(op.id = $neodash_q2AvoidId) ) ){1,10}\n    (end)\nRETURN p LIMIT 1",
+          "width": 6,
+          "height": 4,
+          "x": 12,
+          "y": 0,
+          "type": "graph",
+          "selection": {
+            "OperationalPoint": "id",
+            "PassengerTerminal": "id",
+            "UK": "id",
+            "TrainTechnicalServices": "id",
+            "Junction": "id",
+            "SmallStation": "id"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "OperationalPoint",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "PassengerTerminal",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "UK",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "TrainTechnicalServices",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "Junction",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "SmallStation",
+              "name",
+              "id",
+              "geolocation"
+            ]
+          ]
+        },
+        {
+          "id": "dc6c235a-9c60-48f5-a30c-3d86265e7cb0",
+          "title": "Not Avoiding",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_q2StartId}),(end:OperationalPoint {id:$neodash_q2EndId})\nMATCH p =\n    (start)\n    ( (:OperationalPoint)-[:SECTION]-(op:OperationalPoint) ){1,10}\n    (end)\nRETURN p LIMIT 1",
+          "width": 6,
+          "height": 4,
+          "x": 18,
+          "y": 0,
+          "type": "graph",
+          "selection": {
+            "OperationalPoint": "id",
+            "PassengerTerminal": "id",
+            "UK": "id",
+            "TrainTechnicalServices": "id",
+            "SmallStation": "id"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "OperationalPoint",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "PassengerTerminal",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "UK",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "TrainTechnicalServices",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "SmallStation",
+              "name",
+              "id",
+              "geolocation"
+            ]
+          ]
+        },
+        {
+          "id": "870caf00-4fe1-4dfc-8257-bc71157f812e",
+          "title": "",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_q2StartId}),(end:OperationalPoint {id:$neodash_q2EndId})\nMATCH p =\n    (start)\n    ( (:OperationalPoint)-[:SECTION]-(op:OperationalPoint WHERE NOT(op.id = $neodash_q2AvoidId) ) ){1,10}\n    (end)\nRETURN p LIMIT 1",
+          "width": 6,
+          "height": 4,
+          "x": 12,
+          "y": 4,
+          "type": "map",
+          "selection": {
+            "OperationalPoint": "id",
+            "PassengerTerminal": "id",
+            "UK": "id",
+            "TrainTechnicalServices": "id",
+            "Junction": "id",
+            "SmallStation": "id"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "OperationalPoint",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "PassengerTerminal",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "UK",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "TrainTechnicalServices",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "Junction",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "SmallStation",
+              "name",
+              "id",
+              "geolocation"
+            ]
+          ]
+        },
+        {
+          "id": "53a38a40-0331-4413-9026-c4078f4ce30c",
+          "title": "",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_q2StartId}),(end:OperationalPoint {id:$neodash_q2EndId})\nMATCH p =\n    (start)\n    ( (:OperationalPoint)-[:SECTION]-(op:OperationalPoint) ){1,10}\n    (end)\nRETURN p LIMIT 1",
+          "width": 6,
+          "height": 4,
+          "x": 18,
+          "y": 4,
+          "type": "map",
+          "selection": {
+            "OperationalPoint": "id",
+            "PassengerTerminal": "id",
+            "UK": "id",
+            "TrainTechnicalServices": "id",
+            "SmallStation": "id"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "OperationalPoint",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "PassengerTerminal",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "UK",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "TrainTechnicalServices",
+              "name",
+              "id",
+              "geolocation"
+            ],
+            [
+              "SmallStation",
+              "name",
+              "id",
+              "geolocation"
+            ]
+          ]
+        },
+        {
+          "id": "2df18b0c-9b65-4ab6-9253-ce18d8e7dadc",
+          "title": "Operational Points on the way",
+          "query": "MATCH \n    (start:OperationalPoint {id:$neodash_q2StartId}),(end:OperationalPoint {id:$neodash_q2EndId})\nMATCH path =\n    (start)\n    ( (:OperationalPoint)-[:SECTION]-(op:OperationalPoint) ){1,10}\n    (end)\nUNWIND nodes(path) AS p\nWITH p WHERE p <> start AND p <> end\nRETURN DISTINCT p.name AS name, p.id AS __ID\n\n\n",
+          "width": 6,
+          "height": 4,
+          "x": 0,
+          "y": 8,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "name",
+                "value": "__ID",
+                "customization": "set variable",
+                "customizationValue": "q2AvoidId"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Question 3",
+      "reports": [
+        {
+          "id": "44125525-11b8-4afa-afb3-5aff584f4ffe",
+          "title": "Information on Question 3",
+          "query": "Please see the up to date original [here](https://github.com/neo4j-field/gsummit2024/blob/main/dashboards/model-questions/Question%203.md)\n\n# How many routes are affected if I need to upgrade an Operational Point?\n\n> A Switch needs to be upgraded to support the network\n\n## Introduction\n\nIn the [previous question](Question%202.md) we could see that there were situations where we could route around problems, but this isn't always the case. \n\nIn order to know what _Routes_ are affected by an `OperationalPoint` being worked on, we would need to define the concept of a route with reference to the network. \n\nWe don't actually model Routes, what we're modeling is the network itself. Just because you _can_ get from Paddington to Stockholm in a physical sense, it doesn't mean that is a route.\n\nRoutes are typically operated by a service provider which could be a private company, or indeed a national government. A _journey_ could take in multiple routes.\n\nTo model routes, what could we do?\n\n## Some Ideas\n\nThese are a _few_ ideas for how you might want to model it (but you don't _have_ to).\n\n### `ROUTE` Relationship\n\nAdd a `ROUTE` relationship to the model.\n\nThere are lots of ways to do this, for example we could:\n\n* Have an identifier to say which routes are using this `ROUTE`? \n* Maybe a relationship per route? So some `OperationalPoint`s would be joined by multiple (in the case of big terminals - a *lot*) route relationships.\n* Model `ROUTE` only between `Station`/`SmallStation` `OperationalPoints`? - Would this work?\n    - If you skip the `Switch` (for example) how would you know it's on the Route? This question would need to be changed to be 'How many routes are affected if I need to upgrade a `Station`.\n\n### Modifying the `SECTION` Relationship\n\n* Maybe just add identifiers to each `SECTION`\n\n## The bigger problem\n\nWhere is the data?\n\n\nThis is the biggest issue - there are lots of ways to model the data, and each has pros/cons - but it's largely moot without the data, and this is a good example of how - you can have the best set of reasonable business questions, but you don't have the data to actually achieve it.\n\n\nIt's why you need to ensure that the questions are defined by _all_ the stakeholders, the Project Owners, Business Owners _and_ the Developers - to know if it _even_ is possible. \n",
+          "width": 24,
+          "height": 7,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        }
+      ]
+    },
+    {
+      "title": "Question 4",
+      "reports": [
+        {
+          "id": "a21ef9cc-bce8-4a4e-8405-4f0b19f28723",
+          "title": "POIs by Distance from Route",
+          "query": "WITH toInteger($neodash_poi_distance) AS radiusInMetres\nMATCH \n    (malmo:OperationalPoint {name:'Malmö central'}),\n    (paddington:OperationalPoint {name:'PAD London Paddington'})\nWITH \n    malmo, paddington, radiusInMetres\nMATCH shortest = shortestPath( (malmo)-[:SECTION*]-(paddington) )\nUNWIND nodes(shortest) AS station \nWITH station, radiusInMetres\nWHERE 'SmallStation' IN labels(station) \n      OR 'Station' IN labels(station) \n      OR 'PassengerTerminal' IN labels(station) \nMATCH (poi:POI)\nWHERE point.distance(poi.geolocation, station.geolocation) < radiusInMetres\nRETURN \n    station.name AS Station,\n    poi.description AS POI,\n    round(point.distance(poi.geolocation, station.geolocation), 2) AS `Distance (m)`,\n    poi.linkFoto AS __poiPhoto,\n    poi.linkWebSite AS __poiWebsite\nORDER BY `Distance (m)`",
+          "width": 9,
+          "height": 4,
+          "x": 4,
+          "y": 0,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "actionsRules": [
+              {
+                "condition": "Click",
+                "field": "POI",
+                "value": "__poiPhoto",
+                "customization": "set variable",
+                "customizationValue": "poi_photo"
+              },
+              {
+                "condition": "Click",
+                "field": "POI",
+                "value": "__poiWebsite",
+                "customization": "set variable",
+                "customizationValue": "poi_website"
+              }
+            ],
+            "columnWidths": "[1,4,1]"
+          }
+        },
+        {
+          "id": "f976133f-67de-4c4a-b236-fb4b66fe794d",
+          "title": "",
+          "query": "$neodash_poi_photo",
+          "width": 13,
+          "height": 4,
+          "x": 0,
+          "y": 4,
+          "type": "iframe",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "7e470d49-f8b0-46f4-9d02-657e4fe0e2bb",
+          "title": "",
+          "query": "$neodash_poi_website\n\n\n",
+          "width": 11,
+          "height": 8,
+          "x": 13,
+          "y": 0,
+          "type": "iframe",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "cc6580b3-570f-4a09-8a2b-fb6a6c12cc8c",
+          "title": "Distance (m)",
+          "query": "RETURN true;",
+          "width": 4,
+          "height": 4,
+          "x": 0,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Free Text",
+            "entityType": "poi_distance",
+            "parameterName": "neodash_poi_distance"
+          },
+          "schema": []
+        }
+      ]
+    }
+  ],
+  "parameters": {},
+  "extensions": {
+    "active": true,
+    "activeReducers": [],
+    "forms": {},
+    "advanced-charts": {
+      "active": true
+    },
+    "styling": {},
+    "actions": {
+      "active": true
+    },
+    "query-translator": {}
+  },
+  "uuid": "115296c0-9f52-489f-936c-072985d1bb10"
+}

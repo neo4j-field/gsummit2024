@@ -1,6 +1,6 @@
-# Graph Summit 2023 EMEA - Workshop Digital Twin
+# Graph Summit 2024 EMEA - Workshop Digital Twin
 
-This repository contains the material used during the **Graph Summit 2023 - Building a Graph Solution Workshops**. 
+This repository contains the material used during the **Graph Summit 2024 - Building a Graph Solution Workshops**. 
 
 The aim of the workshop is to provide a structured way to build a small Digital Twin Knowledge Graph. It answers questions from a business perspective and discusses how a Digital Twin graph could be extended for more insights and values.
 
@@ -34,6 +34,7 @@ There are many types of Operational Points, including:
 Operational Points have the following properties:
 
 - `id`: A unique identifier
+- `name`: The name of the OP
 - `extralabel`: The type of the OP
 - `name`: The name of the OP
 - `latitude`: The latitude of the OP
@@ -69,27 +70,26 @@ POIs have the following properties:
 
 ## Building the demo environment
 
-The following high level steps are required, to build the demo environment:
+The following high level steps are required, to build the demo environment (there is a [document](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/documents/Preparation%20for%20the%20Workshops.pdf) available as well):
 
 1. Create a Neo4j Graph instance via any of:
-    1. [Neo4j Desktop](https://neo4j.com/download-center/)
-        - If you are using Neo4j Desktop, you will need to ensure that both GDS and APOC are added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
-    2. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
+    1. [Neo4j Aura](https://neo4j.com/cloud/aura-free/)
+    2. [Neo4j Desktop](https://neo4j.com/download-center/)
+        - If you are using Neo4j Desktop, you will need to ensure that APOC is added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
+    3. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
 
-2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
+2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
 
-3. After the script has finished loading, you can check your data model. Run the command `CALL apoc.meta.subGraph({labels:['OperationalPoint', 'OperationalPointName', 'POI']})` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
+3. After the script has finished loading, you can check your data model. Run the command `CALL apoc.meta.subGraph({labels:['OperationalPoint', 'POI']})` in your Browser query window. It should look like the following (maybe yours is a bit more mixed up):
 
-<img width="800" alt="Data Model - Digital Twin" src="https://raw.githubusercontent.com/cskardon/gsummit2023/main/images/Model.svg">
+<img width="800" alt="Data Model - Digital Twin" src="https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/images/Model.svg">
 
 The model shows that we have an `OperationalPoint` Node that is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network .
-
-> The name of an `OperationalPoint` has been extracted to the `OperationalPointName` node because there are `OperationalPoint`s with multiple names. These are typically `BorderPoint`s where each country has a different name for the `BorderPoint`. For example, the `BorderPoint` between Sweden and Denmark has the names 'Peberholm gränsen' (Sweden), and 'Peberholm grænse' (Denmark).
 
 ---
 ## Run some Cypher queries on your Graph 
 
-> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/cskardon/gsummit2023/main/cypher/all_queries.cypher) file. 
+> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/cypher/all_queries.cypher) file. 
 >
 > For the workshop we will be running through the contents of this readme.
 
@@ -100,15 +100,13 @@ You might find the [Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-shee
 ---
 ## Simple Queries
 
-This query will get `10` random `OperationalPointName` Nodes from the database, returning them to the browser.
+This query will get `10` random `OperationalPoint` Nodes from the database, returning them to the browser.
 
 ```cypher
-MATCH (opn:OperationalPointName) 
-RETURN opn 
+MATCH (op:OperationalPoint) 
+RETURN op 
 LIMIT 10;
 ```
-
-If you double click on one the returned Nodes, you will see you get taken to an actual `OperationalPoint`. If you have a `BorderPoint` you might find it has two `OperationalPointName` nodes. 
 
 This query will get `50` random `OperationalPoint` Nodes from the database, returning them to the browser.
 
@@ -118,7 +116,7 @@ RETURN op
 LIMIT 50;
 ```
 
-If you are working in the EU Rail Network, the `id` property might be something you are familiar with, but the `OperationPointName` is the more friendly name. You can see if you double click on one of these, you _should_ find `SECTION` relationships joining the `OperationalPoint` to another. If it isn't - this is an indication of data quality. This might be something you would want to check on a regular basis, a query for orphaned nodes for example.
+If you are working in the EU Rail Network, the `id` property might be something you are familiar with, but the `name` property is the more friendly name. You can see if you double click on one of these, you _should_ find `SECTION` relationships joining the `OperationalPoint` to another. If it isn't - this is an indication of data quality. This might be something you would want to check on a regular basis, a query for orphaned nodes for example.
 
 ```cypher
 MATCH (op:OperationalPoint)
@@ -129,9 +127,9 @@ RETURN COUNT(op);
 We don't want that kind of data in our Graph as it could cause problems when we want to do things like Community Detection, and keeping our data as clean as possible is a goal we should have.
 
 ```cypher
-MATCH (op:OperationalPoint)-[:NAMED]->(opn:OperationalPointName)
+MATCH (op:OperationalPoint)
 WHERE NOT EXISTS ( (op)-[:SECTION]-() )
-DETACH DELETE op, opn
+DETACH DELETE op
 ```
 
 We used something called `DETACH DELETE` here - the reason for this is that Neo4j doesn't allow for 'hanging' relationships - i.e. relationships that don't have a start or end point (or neither) - and by `DETACH` we are telling Neo4j to delete the relationships as well. If you didn't have `DETACH` you would get an error when Neo4j attempted to execute it.
@@ -265,10 +263,10 @@ This is a good example of **'Knowing your Domain'**, and investigating your data
 
 ```cypher
 MATCH 
-    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
-    (:OperationalPointName {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})<-[:NAMED]-(berlin:OperationalPoint)
+    (stockholm:OperationalPoint {name:'Stockholms central'}),
+    (berlin:OperationalPoint {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})
 WITH stockholm, berlin
-MATCH p= ((stockholm)-[:SECTION]-(berlin))
+MATCH p = ( (stockholm)-[:SECTION]-(berlin) )
 RETURN p 
 LIMIT 1
 ```
@@ -305,8 +303,8 @@ The 'Sweden to Berlin' problem is more complicated, as, the gap occurs in Denmar
 
 ```cypher
 MATCH 
-    (:OperationalPointName {name: 'Nyborg'})<-[:NAMED]-(nyborg:OperationalPoint),
-    (:OperationalPointName {name: 'Hjulby'})<-[:NAMED]-(hjulby:OperationalPoint)
+    (nyborg:OperationalPoint {name: 'Nyborg'}),
+    (hjulby:OperationalPoint {name: 'Hjulby'})
 MERGE (nyborg)-[:SECTION {sectionlength: point.distance(nyborg.geolocation, hjulby.geolocation)/1000.0, curated: true}]->(hjulby);
 ```
 
@@ -315,12 +313,12 @@ MERGE (nyborg)-[:SECTION {sectionlength: point.distance(nyborg.geolocation, hjul
 At the moment, we store the `sectionlength` (in KM) and `speed` (in KPH) properties on the `SECTION` relationship, we can use these together to work out the _best_ time we could take to cross this section on the fly:
 
 ```cypher
-MATCH (o1:OperationalPointName)<-[:NAMED]-(s1:Station)-[s:SECTION]->(s2:Station)-[:NAMED]->(o2:OperationalPointName)
+MATCH (s1:Station)-[s:SECTION]->(s2:Station)
 WHERE 
     NOT (s.speed IS NULL) 
     AND NOT (s.sectionlength IS NULL )
 WITH 
-    o1.name AS startName, o2.name AS endName,
+    s1.name AS startName, s2.name AS endName,
     (s.sectionlength / s.speed) * 60 * 60 AS timeTakenInSeconds
     LIMIT 1
 RETURN startName, endName, timeTakenInSeconds
@@ -336,7 +334,7 @@ WHERE
 SET r.traveltime = (r.sectionlength / r.speed) * 60 * 60
 ```
 
-> **IMPORTANT** To be able to use the [NeoDash dashboard](https://raw.githubusercontent.com/cskardon/gsummit2023/main/dashboards/digital-twin_dashboard.json) in this repository fully, you will need to execute this query.
+> **IMPORTANT** To be able to use the [NeoDash dashboard](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/dashboards/digital-twin_dashboard.json) in this repository fully, you will need to execute this query.
 
 ## Shortest Path Queries using different Shortest Path functions in Neo4j
 
@@ -347,152 +345,43 @@ This query will find the shortest number of hops between `OperationalPoint`s, ir
 ```cypher
 // Cypher shortest path
 MATCH 
-    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
-    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint)
+    (stockholm:OperationalPoint {name:'Stockholms central'}),
+    (malmo:OperationalPoint {name:'Malmö central'})
 WITH stockholm, malmo
 MATCH path = shortestPath ( (malmo)-[:SECTION*]-(stockholm) )
 RETURN path
 ```
 
-This may not be suitable though, as we've not taken into account distance, nor speed - to do that, we should look at Graph Data Science...
+This may not be suitable though, as we've not taken into account distance, nor speed - At a base level, we can use [APOC](https://neo4j.com/docs/apoc/current/) to take into account the `sectionlength` or indeed `traveltime`. 
 
----
+In this case we'll be using the [Dijkstra Shortest Path algorithm](https://neo4j.com/docs/apoc/current/overview/apoc.algo/apoc.algo.dijkstra/) to apply different weightings.
+
+```cypher
+// APOC Dijkstra shortest path with weight sectionlength
+MATCH 
+    (stockholm:OperationalPoint {name:'Stockholms central'}),
+    (malmo:OperationalPoint {name:'Malmö central'})
+WITH stockholm, malmo
+CALL apoc.algo.dijkstra(stockholm, malmo, 'SECTION', 'sectionlength') YIELD path, weight
+RETURN length(path), weight;
+```
+
+```cypher
+// APOC Dijkstra shortest path with weight traveltime
+MATCH 
+    (stockholm:OperationalPoint {name:'Stockholms central'}),
+    (malmo:OperationalPoint {name:'Malmö central'})
+WITH stockholm, malmo
+CALL apoc.algo.dijkstra(stockholm, malmo, 'SECTION', 'traveltime') YIELD path, weight
+RETURN length(path), weight;
+```
+
+## NeoDash
+
+Everything we've done so far has been within the development tooling of Neo4j, but for our product owners to see the benefits, we probably don't want to show a lot of Cypher. 
+
+From here, we're going to go to [NeoDash](dashboards/README.md) to take our model into something usable for those of us who don't want to code.
 
 ## Graph Data Science (GDS)
 
-We will be projecting a graph into the GDS [Graph Catalog](https://neo4j.com/docs/graph-data-science/current/management-ops/graph-catalog-ops/) using [Native Projection](https://neo4j.com/docs/graph-data-science/current/management-ops/projections/graph-project/) 
-
-If you want to ensure you have no existing projections you can run the following Cypher to clear your Graph Catalog:
-
-```cypher
-CALL gds.graph.list() YIELD graphName AS toDrop
-CALL gds.graph.drop(toDrop) YIELD graphName
-RETURN "Dropped " + graphName;
-```
-
-We will project a graph named 'OperationalPoints' into the Graph Catalog. We will take the `OperationalPoint` Nodes and the `SECTION` Relationships to form a monopartite graph:
-
-```cypher
-CALL gds.graph.project(
-    'OperationalPoints',
-    'OperationalPoint',
-    {SECTION: {orientation: 'UNDIRECTED'}},
-    {
-        relationshipProperties: ['sectionlength', 'traveltime']
-    }
-);
-```
-
-### Path Finding
-
-We can calculate the shortest path between two stations - for example, Malmö Central to Stockholm Central - using our `traveltime` relatonship weights and the [Dijkstra Source-Target Shortest Path](https://neo4j.com/docs/graph-data-science/current/algorithms/dijkstra-source-target/) algorithm from the GDS library.  Note that bad data in our dataset (such as `null` or `zero` relationship weights) can cause strange results when calculating weighted shortest paths.
-
-```cypher
-MATCH     
-    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
-    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint)
-CALL gds.shortestPath.dijkstra.stream('OperationalPoints', {
-    sourceNode: malmo,
-    targetNode: stockholm,
-    relationshipWeightProperty: 'traveltime'
-})
-YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
-RETURN *;
-```
-
-Do we get the same result if we use the `sectionlength` relationship property as our weight instead of `traveltime` when computing the shortest path?
-
-```cypher
-MATCH     
-    (:OperationalPointName {name:'Stockholms central'})<-[:NAMED]-(stockholm:OperationalPoint),
-    (:OperationalPointName {name:'Malmö central'})<-[:NAMED]-(malmo:OperationalPoint)
-CALL gds.shortestPath.dijkstra.stream('OperationalPoints', {
-    sourceNode: malmo,
-    targetNode: stockholm,
-    relationshipWeightProperty: 'sectionlength'
-})
-YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
-RETURN *;
-```
-
-### Community Detection
-
-Now we use the [Weakly Connected Components](https://neo4j.com/docs/graph-data-science/current/algorithms/wcc/) algorithm in 'stream' mode to review `OperationalPoint`s that are _not_ well connected to the network:
-
-```cypher
-CALL gds.wcc.stream('OperationalPoints') YIELD nodeId, componentId
-WITH collect(gds.util.asNode(nodeId).id) AS nodes, componentId
-RETURN nodes, componentId 
-ORDER BY size(nodes) ASC LIMIT 50;
-```
-
-We can also write the Weakly Connected Components `componentId` properties to the database so we can query and visualise them later:
-
-```cypher
-CALL gds.wcc.write('OperationalPoints', {writeProperty: 'componentId'});
-```
-
-We should index our new Weakly Connected Components `componentId` property, so that we can query with it in a performant way:
-
-```cypher
-CREATE INDEX index_OperationalPointName_componentid IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.componentId);
-```
-
-Let's find a specific `OperationalPoint` and view the other members of its community. You should see that it belongs to an isolated group of `OperationalPoint`s.
-
-```cypher
-MATCH (op:OperationalPoint {id: 'UKN4288'})
-WITH op.componentId as component
-MATCH path = (:OperationalPoint {componentId: component})-[:SECTION]->()
-RETURN path
-```
-
-### Centrality
-
-Using the [Degree Centrality](https://neo4j.com/docs/graph-data-science/current/algorithms/degree-centrality/) algorithm we can identify important nodes in the graph based on how many `SECTION` relationships they have.
-Nodes with a high Degree Centrality score represent `OperationalPoint`s which are important transfer points in our network.
-
-```cypher
-CALL gds.degree.stream('OperationalPoints')
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).id AS id, score
-ORDER BY score DESC LIMIT 50;
-```
-
-We should write the Degree Centrality `degreeScore` properties to the database so we can query and visualise them later:
-
-```cypher
-CALL gds.degree.write('OperationalPoints', {writeProperty: 'degreeScore'})
-```
-
-Using the [Betweenness Centrality](https://neo4j.com/docs/graph-data-science/current/algorithms/betweenness-centrality/) algorithm we can identify important nodes in the graph by another metric - those nodes which sit on the shortest path between the most other nodes.
-
-These nodes represent `OperationalPoint`s which many journeys are likely to pass through, and may act as 'bridge' nodes between different parts of the network.
-
-```cypher
-CALL gds.betweenness.stream('OperationalPoints')
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).id AS id, score
-ORDER BY score DESC LIMIT 50;
-```
-
-We should also write the Betweenness Centrality scores back to the database so we can query and visualise them later:
-
-```cypher
-CALL gds.betweenness.write('OperationalPoints', {writeProperty: 'betweennessScore'})
-```
-
-Let's also index our new Degree Centrality `degreeScore`and Betweenness Centrality `betweennessScore` properties, so that we can query using them in a performant way:
-
-```cypher
-CREATE INDEX index_OperationalPointName_degreeScore IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.degreeScore);
-CREATE INDEX index_OperationalPointName_betweennessScore IF NOT EXISTS FOR (opn:OperationalPointName) ON (opn.betweennessScore);
-```
-
-### Tidy Up
-
-Finally, it's best practice to remove your graph projections from memory when you're finished with them:
-
-```cypher
-CALL gds.graph.drop('OperationalPoints')
-```
+_Optional_: If you are running on an environment with GDS installed (Desktop, Sandbox etc) then you can also follow the [Graph Data Science](README.gds.md) content.
