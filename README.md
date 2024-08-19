@@ -1,6 +1,6 @@
 # Graph Summit 2024 EMEA - Workshop Digital Twin
 
-This repository contains the material used during the **Graph Summit 2024 - Building a Graph Solution Workshops**. 
+This repository contains the material used during the **Graph Summit 2024 - Building a Graph Solution Workshops**.
 
 The aim of the workshop is to provide a structured way to build a small Digital Twin Knowledge Graph. It answers questions from a business perspective and discusses how a Digital Twin graph could be extended for more insights and values.
 
@@ -9,10 +9,12 @@ It provides an environment for further experiments and can be used to show the v
 ### Target Audience
 
 The workshop is intended for those who:
-* Are new to Graph Databases or Graph Analytics
-* Have experience of Graph Databases or Graph Analytics who are looking for a different example of the value of Graph
+
+- Are new to Graph Databases or Graph Analytics
+- Have experience of Graph Databases or Graph Analytics who are looking for a different example of the value of Graph
 
 ---
+
 ## About the data
 
 The data used describes a static rail network, consisting of **Sections** of lines and **Operational Points** (OP) that are connected to those Sections.
@@ -22,14 +24,16 @@ The dataset is freely available on the Register of Infrastructure (RINF) portal 
 The format of the data has been converted to a Comma Seperated Values (`CSV`) format for expediency in the workshop.
 
 ### Operational Points
-Operational Points are the start and end points of a Section. 
+
+Operational Points are the start and end points of a Section.
 
 There are many types of Operational Points, including:
-* Stations
-* Small Stations
-* Passenger Stops
-* Switches
-* Junctions
+
+- Stations
+- Small Stations
+- Passenger Stops
+- Switches
+- Junctions
 
 Operational Points have the following properties:
 
@@ -53,7 +57,7 @@ Sections have the following properties:
 
 ### Point of Interests (POI)
 
-A point of interest (POI) is a specific point location that someone may find useful or interesting. For example, the Eiffel Tower, or Big Ben. 
+A point of interest (POI) is a specific point location that someone may find useful or interesting. For example, the Eiffel Tower, or Big Ben.
 
 POIs have the following properties:
 
@@ -70,13 +74,14 @@ POIs have the following properties:
 
 ## Building the demo environment
 
-The following high level steps are required, to build the demo environment (there is a [document](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/documents/Preparation%20for%20the%20Workshops.pdf) available as well):
+The following high level steps are required, to build the demo environment (there is a [document](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/documents/Preparation%20for%20the%20Workshops%20-%202024.pdf) available as well):
 
 1. Create a Neo4j Graph instance via any of:
-    1. [Neo4j Aura](https://neo4j.com/cloud/aura-free/)
-    2. [Neo4j Desktop](https://neo4j.com/download-center/)
-        - If you are using Neo4j Desktop, you will need to ensure that APOC is added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
-    3. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
+
+   1. [Neo4j Aura](https://neo4j.com/cloud/aura-free/)
+   2. [Neo4j Desktop](https://neo4j.com/download-center/)
+      - If you are using Neo4j Desktop, you will need to ensure that APOC is added to any graph you create. Installation instructions can be found [here](https://neo4j.com/docs/desktop-manual/current/).
+   3. [Neo4j Sandbox](https://sandbox.neo4j.com/) use a "Blank Sandbox"
 
 2. Open Neo4j Browser and run the [`load-all-data.cypher`](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/cypher/load-all-data.cypher) script from the code directory above. You can copy & paste the complete code into the Neo4j Browser query window.
 
@@ -87,9 +92,10 @@ The following high level steps are required, to build the demo environment (ther
 The model shows that we have an `OperationalPoint` Node that is connected to itself with a `SECTION` relationship. This means, `OperationalPoint`s are connected together and make up the rail network .
 
 ---
-## Run some Cypher queries on your Graph 
 
-> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/cypher/all_queries.cypher) file. 
+## Run some Cypher queries on your Graph
+
+> You can find a copy of these queries in the [`all_queries.cypher`](https://raw.githubusercontent.com/neo4j-field/gsummit2024/main/cypher/all_queries.cypher) file.
 >
 > For the workshop we will be running through the contents of this readme.
 
@@ -98,21 +104,22 @@ All the queries are intended to be run in the Neo4j Browser query window. Please
 You might find the [Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-sheet/current/) useful, especially if you want to write your own queries, but it is not necessary for following the queries below.
 
 ---
+
 ## Simple Queries
 
 This query will get `10` random `OperationalPoint` Nodes from the database, returning them to the browser.
 
 ```cypher
-MATCH (op:OperationalPoint) 
-RETURN op 
+MATCH (op:OperationalPoint)
+RETURN op
 LIMIT 10;
 ```
 
 This query will get `50` random `OperationalPoint` Nodes from the database, returning them to the browser.
 
 ```cypher
-MATCH (op:OperationalPoint) 
-RETURN op 
+MATCH (op:OperationalPoint)
+RETURN op
 LIMIT 50;
 ```
 
@@ -137,53 +144,57 @@ We used something called `DETACH DELETE` here - the reason for this is that Neo4
 So far we have only looked at how to query the Nodes, so let's run a query to find some `OperationalPoint`s _and_ the Relationships that connect them.
 
 ```cypher
-MATCH path=(:OperationalPoint)--(:OperationalPoint) 
-RETURN path 
+MATCH path=(:OperationalPoint)--(:OperationalPoint)
+RETURN path
 LIMIT 100;
 ```
 
 This query uses `--` to signify the relationship, and that means a couple of things:
-* It is undirected - we don't mind which way the relationship goes
-* It can be _any_ type - if we had Relationship types _other_ than `SECTION` between `OperationalPoint`s in our Graph we would return those as well
+
+- It is undirected - we don't mind which way the relationship goes
+- It can be _any_ type - if we had Relationship types _other_ than `SECTION` between `OperationalPoint`s in our Graph we would return those as well
 
 In order to make our query future proof, and more performant, we should add the type of the Relationship, and the Direction - `-[:SECTION]->` this helps in both senses as:
-* The Type means that if in the future someone _does_ add a new relationship type, our query _still_ returns what we expect it to
-* The Query Planner doesn't need to check every relationship coming from an `OperationalPoint` to see what is at the other end
+
+- The Type means that if in the future someone _does_ add a new relationship type, our query _still_ returns what we expect it to
+- The Query Planner doesn't need to check every relationship coming from an `OperationalPoint` to see what is at the other end
 
 ```cypher
-MATCH path=(:OperationalPoint)-[:SECTION]->(:OperationalPoint) 
-RETURN path 
+MATCH path=(:OperationalPoint)-[:SECTION]->(:OperationalPoint)
+RETURN path
 LIMIT 100;
 ```
 
 ## Filtering Queries
 
 There are three broad ways to filter our queries:
-* Inline property matching
-* Inline `WHERE`
-* `WHERE`
+
+- Inline property matching
+- Inline `WHERE`
+- `WHERE`
 
 ### Inline property matching
 
 This is only useful for exact matching, i.e. the `id` _is_ `'SECst'` (for example).
 
 ```cypher
-MATCH (op:OperationalPoint {id:'SECst'}) 
+MATCH (op:OperationalPoint {id:'SECst'})
 RETURN op;
 ```
 
 ### Inline `WHERE`
 
 You can still do exact matching (as shown below), but by using `WHERE` you have the ability to also do things like:
-* `CONTAINS`
-* `STARTS WITH`
-* `ENDS WITH`
-* `>=`
-* `<=`
-* etc
+
+- `CONTAINS`
+- `STARTS WITH`
+- `ENDS WITH`
+- `>=`
+- `<=`
+- etc
 
 ```cypher
-MATCH (op:OperationalPoint WHERE op.id='SECst') 
+MATCH (op:OperationalPoint WHERE op.id='SECst')
 RETURN op;
 ```
 
@@ -192,21 +203,23 @@ RETURN op;
 This is exactly the same (in terms of what you can do) as the 'Inline `WHERE`' clause, it's just at a different position in the query, and largely the choice of what you want to use is a personal one. They are _all_ equally performant.
 
 ```cypher
-MATCH (op:OperationalPoint) 
-WHERE op.id='SECst' 
+MATCH (op:OperationalPoint)
+WHERE op.id='SECst'
 RETURN op;
 ```
 
 ## Profiling
-How do we _know_ they are all the same though? Neo4j & Cypher allow us to `PROFILE` or `EXPLAIN` our queries. 
-* `EXPLAIN` allows us to see what the Query Planner _thinks_ it will do, without executing the query - this is useful when we have a query that is maybe taking a long time to run and we want to see if there is a reason.
-* `PROFILE` actually executes the query and returns back to us the plan that was _actually_ used, including the metrics of how much of the database was 'hit'
+
+How do we _know_ they are all the same though? Neo4j & Cypher allow us to `PROFILE` or `EXPLAIN` our queries.
+
+- `EXPLAIN` allows us to see what the Query Planner _thinks_ it will do, without executing the query - this is useful when we have a query that is maybe taking a long time to run and we want to see if there is a reason.
+- `PROFILE` actually executes the query and returns back to us the plan that was _actually_ used, including the metrics of how much of the database was 'hit'
 
 First we'll `EXPLAIN` our 'Inline property match' query:
 
 ```cypher
 EXPLAIN
-MATCH (op:OperationalPoint {id:'SECst'}) 
+MATCH (op:OperationalPoint {id:'SECst'})
 RETURN op;
 ```
 
@@ -216,7 +229,7 @@ If we now `PROFILE` the same query:
 
 ```cypher
 PROFILE
-MATCH (op:OperationalPoint {id:'SECst'}) 
+MATCH (op:OperationalPoint {id:'SECst'})
 RETURN op;
 ```
 
@@ -224,8 +237,9 @@ We get the _same_ plan back, this time with the number of 'db hits' and if we lo
 
 `Cypher version: , planner: COST, runtime: PIPELINED. 5 total db hits in 2 ms.`
 
->### Sidenote: What is a 'db hit'?
->A 'db hit' is an abstract metric to give you a comparative figure to see how one query compares to another. 
+> ### Sidenote: What is a 'db hit'?
+>
+> A 'db hit' is an abstract metric to give you a comparative figure to see how one query compares to another.
 
 Now, we can `PROFILE` our other filter queries to compare them, first the 'Inline `WHERE`'
 
@@ -237,11 +251,10 @@ RETURN op;
 
 And then the other `WHERE`
 
-
 ```cypher
 PROFILE
-MATCH (op:OperationalPoint) 
-WHERE op.id='SECst' 
+MATCH (op:OperationalPoint)
+WHERE op.id='SECst'
 RETURN op;
 ```
 
@@ -253,7 +266,7 @@ We already found, and dealt with orphaned (or disconnected) Nodes, but what if t
 
 ```cypher
 MATCH path=( (uk:UK)-[:SECTION]-(france:France) )
-RETURN path 
+RETURN path
 LIMIT 1
 ```
 
@@ -262,12 +275,12 @@ We get no results, as there is no way in our current data set to get from the UK
 This is a good example of **'Knowing your Domain'**, and investigating your dataset for problems from the context of your knowledge. For example, a domain expert might know you _can_ get a train from Stockholm to Berlin, but querying it gets no results:
 
 ```cypher
-MATCH 
+MATCH
     (stockholm:OperationalPoint {name:'Stockholms central'}),
     (berlin:OperationalPoint {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})
 WITH stockholm, berlin
 MATCH p = ( (stockholm)-[:SECTION]-(berlin) )
-RETURN p 
+RETURN p
 LIMIT 1
 ```
 
@@ -276,11 +289,11 @@ In this query we take advantage of the fact that we have `BorderPoint`s and our 
 This query doesn't _necessarily_ generate the _right_ border crossing, but for the purposes of this workshop it is adequate. This is a point where Domain Knowledge would come in to play.
 
 ```cypher
-MATCH 
+MATCH
     (germany:BorderPoint:Germany),
     (denmark:Denmark)
-WITH 
-    germany, denmark, 
+WITH
+    germany, denmark,
     point.distance(germany.geolocation, denmark.geolocation) AS distance
 ORDER BY distance LIMIT 1
 MERGE (germany)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(denmark);
@@ -289,11 +302,11 @@ MERGE (germany)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(den
 The UK / France border crossing is equally as simple, and shows that by using multiple labels we can simplify our queries dramatically.
 
 ```cypher
-MATCH 
+MATCH
     (uk:UK:BorderPoint),
     (france:France)
-WITH 
-    uk, france, 
+WITH
+    uk, france,
     point.distance(france.geolocation, uk.geolocation) as distance
 ORDER by distance LIMIT 1
 MERGE (france)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(uk);
@@ -302,7 +315,7 @@ MERGE (france)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(uk);
 The 'Sweden to Berlin' problem is more complicated, as, the gap occurs in Denmark between two Danish `OperationalPoint`s, 'Nyborg' and 'Hjulby' - so we need to find them by name instead.
 
 ```cypher
-MATCH 
+MATCH
     (nyborg:OperationalPoint {name: 'Nyborg'}),
     (hjulby:OperationalPoint {name: 'Hjulby'})
 MERGE (nyborg)-[:SECTION {sectionlength: point.distance(nyborg.geolocation, hjulby.geolocation)/1000.0, curated: true}]->(hjulby);
@@ -314,10 +327,10 @@ At the moment, we store the `sectionlength` (in KM) and `speed` (in KPH) propert
 
 ```cypher
 MATCH (s1:Station)-[s:SECTION]->(s2:Station)
-WHERE 
-    NOT (s.speed IS NULL) 
+WHERE
+    NOT (s.speed IS NULL)
     AND NOT (s.sectionlength IS NULL )
-WITH 
+WITH
     s1.name AS startName, s2.name AS endName,
     (s.sectionlength / s.speed) * 60 * 60 AS timeTakenInSeconds
     LIMIT 1
@@ -328,8 +341,8 @@ But that's going to be inefficient, when we need to calculate a _lot_ of `SECTIO
 
 ```cypher
 MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
-WHERE 
-    r.speed IS NOT NULL 
+WHERE
+    r.speed IS NOT NULL
     AND r.sectionlength IS NOT NULL
 SET r.traveltime = (r.sectionlength / r.speed) * 60 * 60
 ```
@@ -338,13 +351,13 @@ SET r.traveltime = (r.sectionlength / r.speed) * 60 * 60
 
 ## Shortest Path Queries using different Shortest Path functions in Neo4j
 
-In these queries, we're going to look at finding the Shortest Path from Brussels to Berlin. 
+In these queries, we're going to look at finding the Shortest Path from Brussels to Berlin.
 
 This query will find the shortest number of hops between `OperationalPoint`s, irregardless of the distance that would be travelled.
 
 ```cypher
 // Cypher shortest path
-MATCH 
+MATCH
     (stockholm:OperationalPoint {name:'Stockholms central'}),
     (malmo:OperationalPoint {name:'Malmö central'})
 WITH stockholm, malmo
@@ -352,13 +365,13 @@ MATCH path = shortestPath ( (malmo)-[:SECTION*]-(stockholm) )
 RETURN path
 ```
 
-This may not be suitable though, as we've not taken into account distance, nor speed - At a base level, we can use [APOC](https://neo4j.com/docs/apoc/current/) to take into account the `sectionlength` or indeed `traveltime`. 
+This may not be suitable though, as we've not taken into account distance, nor speed - At a base level, we can use [APOC](https://neo4j.com/docs/apoc/current/) to take into account the `sectionlength` or indeed `traveltime`.
 
 In this case we'll be using the [Dijkstra Shortest Path algorithm](https://neo4j.com/docs/apoc/current/overview/apoc.algo/apoc.algo.dijkstra/) to apply different weightings.
 
 ```cypher
 // APOC Dijkstra shortest path with weight sectionlength
-MATCH 
+MATCH
     (stockholm:OperationalPoint {name:'Stockholms central'}),
     (malmo:OperationalPoint {name:'Malmö central'})
 WITH stockholm, malmo
@@ -368,7 +381,7 @@ RETURN length(path), weight;
 
 ```cypher
 // APOC Dijkstra shortest path with weight traveltime
-MATCH 
+MATCH
     (stockholm:OperationalPoint {name:'Stockholms central'}),
     (malmo:OperationalPoint {name:'Malmö central'})
 WITH stockholm, malmo
@@ -378,7 +391,7 @@ RETURN length(path), weight;
 
 ## NeoDash
 
-Everything we've done so far has been within the development tooling of Neo4j, but for our product owners to see the benefits, we probably don't want to show a lot of Cypher. 
+Everything we've done so far has been within the development tooling of Neo4j, but for our product owners to see the benefits, we probably don't want to show a lot of Cypher.
 
 From here, we're going to go to [NeoDash](dashboards/README.md) to take our model into something usable for those of us who don't want to code.
 
