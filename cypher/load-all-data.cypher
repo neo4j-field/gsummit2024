@@ -113,7 +113,7 @@ CREATE (po:POI {
 //
 MATCH 
     (poi:POI), 
-    (op:Station|SmallStation) 
+    (op:Station|SmallStation|PassengerTerminal) 
 WITH 
     poi, op, 
     point.distance(poi.geolocation, op.geolocation) AS distance
