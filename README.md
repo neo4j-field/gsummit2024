@@ -270,36 +270,19 @@ RETURN path
 LIMIT 1
 ```
 
-We get no results, as there is no way in our current data set to get from the UK to France or indeed Denmark to Germany.
+We get no results, as there is no way in our current data set to get from the UK to France.
 
-This is a good example of **'Knowing your Domain'**, and investigating your dataset for problems from the context of your knowledge. For example, a domain expert might know you _can_ get a train from Stockholm to Berlin, but querying it gets no results:
+This is a good example of **'Knowing your Domain'**, and investigating your dataset for problems from the context of your knowledge. 
+
+In this query we take advantage of the fact that we have `BorderPoint`s and our Nodes have their Country as a label to find all the `BorderPoint`s in the UK, then all the `OperationalPoint`s in France and find the two that are closest together.
 
 ```cypher
-MATCH
-    (stockholm:OperationalPoint {name:'Stockholms central'}),
-    (berlin:OperationalPoint {name:'Berlin Hauptbahnhof - Lehrter Bahnhof'})
-WITH stockholm, berlin
-MATCH p = ( (stockholm)-[:SECTION]-(berlin) )
-RETURN p
+MATCH path=( (uk:BorderPoint:UK)-[:SECTION]-(france:France) )
+RETURN path
 LIMIT 1
 ```
 
-In this query we take advantage of the fact that we have `BorderPoint`s and our Nodes have their Country as a label to find all the `BorderPoint`s in Germany, then all the `OperationalPoint`s in Denmark and find the two that are closest together.
-
 This query doesn't _necessarily_ generate the _right_ border crossing, but for the purposes of this workshop it is adequate. This is a point where Domain Knowledge would come in to play.
-
-```cypher
-MATCH
-    (germany:BorderPoint:Germany),
-    (denmark:Denmark)
-WITH
-    germany, denmark,
-    point.distance(germany.geolocation, denmark.geolocation) AS distance
-ORDER BY distance LIMIT 1
-MERGE (germany)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(denmark);
-```
-
-The UK / France border crossing is equally as simple, and shows that by using multiple labels we can simplify our queries dramatically.
 
 ```cypher
 MATCH
@@ -310,15 +293,6 @@ WITH
     point.distance(france.geolocation, uk.geolocation) as distance
 ORDER by distance LIMIT 1
 MERGE (france)-[:SECTION {sectionlength: distance/1000.0, curated: true}]->(uk);
-```
-
-The 'Sweden to Berlin' problem is more complicated, as, the gap occurs in Denmark between two Danish `OperationalPoint`s, 'Nyborg' and 'Hjulby' - so we need to find them by name instead.
-
-```cypher
-MATCH
-    (nyborg:OperationalPoint {name: 'Nyborg'}),
-    (hjulby:OperationalPoint {name: 'Hjulby'})
-MERGE (nyborg)-[:SECTION {sectionlength: point.distance(nyborg.geolocation, hjulby.geolocation)/1000.0, curated: true}]->(hjulby);
 ```
 
 ## Adding properties globally
