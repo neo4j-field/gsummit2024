@@ -325,7 +325,7 @@ SET r.traveltime = (r.sectionlength / r.speed) * 60 * 60
 
 ## Shortest Path Queries using different Shortest Path functions in Neo4j
 
-In these queries, we're going to look at finding the Shortest Path from Brussels to Berlin.
+In these queries, we're going to look at finding the Shortest Path from Stockholm to Malmö.
 
 This query will find the shortest number of hops between `OperationalPoint`s, irregardless of the distance that would be travelled.
 
