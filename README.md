@@ -123,23 +123,7 @@ RETURN op
 LIMIT 50;
 ```
 
-If you are working in the EU Rail Network, the `id` property might be something you are familiar with, but the `name` property is the more friendly name. You can see if you double click on one of these, you _should_ find `SECTION` relationships joining the `OperationalPoint` to another. If it isn't - this is an indication of data quality. This might be something you would want to check on a regular basis, a query for orphaned nodes for example.
-
-```cypher
-MATCH (op:OperationalPoint)
-WHERE NOT EXISTS ( (op)-[:SECTION]-() )
-RETURN COUNT(op);
-```
-
-We don't want that kind of data in our Graph as it could cause problems when we want to do things like Community Detection, and keeping our data as clean as possible is a goal we should have.
-
-```cypher
-MATCH (op:OperationalPoint)
-WHERE NOT EXISTS ( (op)-[:SECTION]-() )
-DETACH DELETE op
-```
-
-We used something called `DETACH DELETE` here - the reason for this is that Neo4j doesn't allow for 'hanging' relationships - i.e. relationships that don't have a start or end point (or neither) - and by `DETACH` we are telling Neo4j to delete the relationships as well. If you didn't have `DETACH` you would get an error when Neo4j attempted to execute it.
+If you are working in the EU Rail Network, the `id` property might be something you are familiar with, but the `name` property is the more friendly name. You can see if you double click on one of these, you _should_ find `SECTION` relationships joining the `OperationalPoint` to another. If it isn't - this is an indication of data quality. This might be something you would want to check on a regular basis, we will address data quality a little later.
 
 So far we have only looked at how to query the Nodes, so let's run a query to find some `OperationalPoint`s _and_ the Relationships that connect them.
 
@@ -262,7 +246,39 @@ For all 3 you should see the _same_ plan and performance, which reinforces the v
 
 ## Data Integrity
 
-We already found, and dealt with orphaned (or disconnected) Nodes, but what if there are gaps in the networks that we need to fill. For example, the Channel Tunnel connects France to the UK, but if we run an exploratory query on our dataset:
+Since we currently have the full RNIF dataset loaded we need to think about cleaning it up to suit our intended use cases. The data contains some sections that dont contain the data required for us to determine travel time or distance for a given route. Sections without length are typically maintenance lines not available to the public so we can safely remove them.
+
+```cypher
+MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
+WHERE r.sectionlength IS NULL
+DELETE r
+```
+Also sections without a currently assigned speed limit we will set to a default of 60km/h
+
+```cypher
+MATCH (:OperationalPoint)-[r:SECTION]->(:OperationalPoint)
+WHERE r.speed IS NULL 
+SET r.speed = 60.0
+```
+Now we can look for any OperationalPoint nodes that dont have any attached sections.
+
+```cypher
+MATCH (op:OperationalPoint)
+WHERE NOT EXISTS ( (op)-[:SECTION]-() )
+RETURN COUNT(op);
+```
+
+We don't want that kind of data in our Graph as it could cause problems when we want to do things like Community Detection, and keeping our data as clean as possible is a goal we should have.
+
+```cypher
+MATCH (op:OperationalPoint)
+WHERE NOT EXISTS ( (op)-[:SECTION]-() )
+DETACH DELETE op
+```
+
+We used something called `DETACH DELETE` here - the reason for this is that Neo4j doesn't allow for 'hanging' relationships - i.e. relationships that don't have a start or end point (or neither) - and by `DETACH` we are telling Neo4j to delete the relationships as well. If you didn't have `DETACH` you would get an error when Neo4j attempted to execute it.
+
+Now we have dealt with orphaned (or disconnected) Nodes, but what if there are gaps in the networks that we need to fill. For example, the Channel Tunnel connects France to the UK, but if we run an exploratory query on our dataset:
 
 ```cypher
 MATCH path=( (uk:UK)-[:SECTION]-(france:France) )
