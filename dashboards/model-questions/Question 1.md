@@ -30,6 +30,8 @@ RETURN path, weight;
 
 So we know _how_ to query the database, but how do we represent this in NeoDash? 
 
+On your browser, Open NeoDash — https://neodash.graphapp.io/
+
 ## Plugins
 
 First we need to have a new dashboard, and turn on 'Advanced Visualisations' and 'Report Actions'.
